@@ -1,0 +1,13 @@
+﻿.StudyWatchtowers {
+    display:none;
+    position: absolute;
+    top: 15vh;
+    LEFT: 5vw;
+    width: 25vw;
+    overflow: auto;
+    height: 60vh;
+    border: 4px solid #3498db;
+    padding: 10PX;
+    border-radius: 5px;
+   
+}

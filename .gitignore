@@ -3,3 +3,11 @@
 ################################################################################
 
 /StudyPlus/.vs/StudyPlus
+/StudyPlus/bin
+/StudyPlus/.config
+/Misc
+/StudyPlus/obj
+/StudyPlus/packages
+/StudyPlus/Properties
+/StudyPlus/wwwroot/Scripts/Apps/Templates/Default
+/StudyPlus/wwwroot/Scripts/Apps/_AppsIgnore

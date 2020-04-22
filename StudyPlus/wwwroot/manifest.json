@@ -1,0 +1,18 @@
+﻿{
+  "dir": "ltr",
+  "lang": "en",
+  "name": "Study Plus",
+  "scope": "/",
+  "display": "fullscreen",
+  "start_url": "index.html",
+  "short_name": "Study Plus",
+  "theme_color": "transparent",
+  "description": "Hands-free studying!",
+  "orientation": "any",
+  "background_color": "transparent",
+  "related_applications": "",
+  "prefer_related_applications": "false",
+  "icons": [],
+  "screenshots": [],
+  "generated": "true"
+}

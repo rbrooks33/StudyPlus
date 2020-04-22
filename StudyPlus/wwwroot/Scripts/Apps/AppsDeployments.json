@@ -1,0 +1,18 @@
+{
+  "Dev": {
+    "Active": true,
+    "Version": "1.0.1",
+    "VirtualFolder": "",
+    "AppsRoot": "Scripts/Apps",
+    "Debug": false,
+    "Test": false
+  },
+  "Prod": {
+    "Active": false,
+    "Version": "1.0.2",
+    "VirtualFolder": "",
+    "AppsRoot": "Scripts/Apps",
+    "Debug": false,
+    "Test":  false
+  }
+}
