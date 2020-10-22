@@ -4,58 +4,58 @@
     <meta charset="utf-8" />
     <title>Study Plus</title>
     <link rel='manifest' href='manifest.json'>
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <!--<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">-->
+    <script src="https://kit.fontawesome.com/27d5012c3e.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.11/lib/draggable.js"></script>
     <script src="Scripts/Apps/Apps.js"></script>
-    <script src="pwabuilder-sw-register.js"></script>
+    <!--<script src="pwabuilder-sw-register.js"></script>-->
     <script>
         Apps.ComponentsReady = function () {
-            //Apps.Notify('info', 'Ready! (See console for details.)');
+            
             Apps.Components.Login.Show();
+            Apps.Components.StudyBook.List();
 
-            let StudyBook = {
-                Docs: [],
-                Tags: [
-                    { TagID: 3 }
-                ],
-                Span: null,
-                TagOperator: 1
-            };
+            //const draggable = new Draggable(document.getElementById('Index_StudyBookListContainer'), {
+            //    draggable: 'EditBookDialog_1'
+            //});
 
-            Apps.Post2('/api/Docs/GetStudyBook', JSON.stringify(StudyBook),
-                function (result) {
-
-                if (result.Success) {
-
-                    let watchtowerList = '<table>';
-                    $.each(result.Data.Docs, function (index, doc) {
-                        watchtowerList += '<tr>';
-                        watchtowerList += '  <td>' + doc.DocTitle + '</td>';
-                        watchtowerList += '</tr>';
-                    });
-
-                    watchtowerList += '</table>';
-                    
-                    let bookHtml = Apps.Util.GetHTML('templateStudyBook',
-                        [
-                            'Study Watchtowers',
-                            'A personal collection of all my Watchtowers.',
-                            watchtowerList
-                        ]);
-
-                    $(document.body).append(bookHtml);
-
-
-                }
-                else
-                    Apps.Notify('warning', 'A problem occurred on the server. Please check out the logs to see what happened.');
-            });
-
+            //draggable.on('drag:start', () => console.log('drag:start'));
+            //draggable.on('drag:move', () => console.log('drag:move'));
+            //draggable.on('drag:stop', () => console.log('drag:stop'));
+        }
+        function DragOver(event) {
+            event.preventDefault();
         }
     </script>
     <link href="index.css" rel="stylesheet" />
 </head>
 <body>
 
-
+    <div class="Index_StudyBookListContainer">
+        <table>
+            <tr>
+                <td>
+                    <div class="Index_NewStudyBook_Button btn btn-primary" onclick="Apps.Components.StudyBook.New();">New Study Book</div>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:center;">My Books</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="Index_StudyBookList btn-group-vertical"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!--<div id="Index_StudyBook_Container" ondragover="DragOver(event);" style="        border: 1px solid rgb(52, 152, 219);
+        position: absolute;
+        /* left: 300px; */
+        width: 500px;
+        height: 500px;
+        top: 66px;
+        left: 20px;
+        width: 80vw;
+        height: 89vh;"></div>-->
 </body>
 </html>

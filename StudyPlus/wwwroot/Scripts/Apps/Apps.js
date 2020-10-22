@@ -2,47 +2,28 @@
     Components: [],
     UI: [],
     LocalComponentsReady: function () {
+        //$ = jQuery.noConflict(true); //Allows legacy jquery to continue to be used
     },
     PreInit: function () {
 
         Apps.SetPolyfills();
 
-        //Apps['ActiveDeployment'] = {
-        //    "Active": true,
-        //    "Version": "1.0.12",
-        //    "WebRoot": location.protocol + "//" + location.hostname,
-        //    "VirtualFolder": "Property",
-        //    "Port": location.port,
-        //    "AppsRoot": "Scripts/Apps",
-        //    "Debug": false,
-        //    "Test": false,
-        //    "Required": "jquery, require, linq, bootstrap4, blockui, dialogs, grids, jqte, notify, binder",
-        //    "UseServer": false,
-        //    "MinimumJavaScriptVersion": "es5"
-        //};
+        Apps['ActiveDeployment'] = {
+            "Active": true,
+            "Version": new Date().getDate(),
+            "WebRoot": location.protocol + "//" + location.hostname,
+            "VirtualFolder": "",
+            "Port": location.port,
+            "AppsRoot": "Scripts/Apps",
+            "Debug": false,
+            "Test": false,
+            "Authenticated": false,
+            "AgencyID": null
+        };
 
-        //if (Apps.ActiveDeployment.Debug) {
-        //    Apps.ActiveDeployment.VirtualFolder = 'Property'; //Set to "Property" if you want to see debug in IIS
-        //}
-        //Apps.LoadDeployment();
-        //console.log('active deployment loaded');
-
-        Apps.Download('Scripts/Apps/AppsDeployments.json', function (response) {
-            let deployments = JSON.parse(response);
-            Object.values(deployments).some(function (d, index) {
-                if (d.Active) {
-                    //Create top-level 'Apps' properties
-                    Apps['ActiveDeployment'] = d;
-                    Apps['ComponentsConfigFileName'] = 'components.json'; //When IIS disallows json use js extension
-                    Apps['ResourcesConfigFileName'] = 'resources.json';
-                    return true;
-                }
-            });
-            if (Apps.ActiveDeployment) {
-                Apps.LoadDeployment();
-                console.log('active deployment loaded');
-            }
-        });
+                Apps.LoadDeployment(function () {
+                    console.log('active deployment loaded (with auth)');
+                });
     },
     Test: function () {
         if (Apps.ActiveDeployment.Test) {
@@ -50,7 +31,31 @@
                 Apps.Components.Testing.Test(arguments);
         }
     },
-    LoadDeployment: function () {
+    Authenticate: function (callback) {
+
+        let webRoot = Apps.ActiveDeployment.WebRoot;
+        let port = Apps.ActiveDeployment.Port.length > 0 ? ':' + Apps.ActiveDeployment.Port : '';
+        let virtualFolder = Apps.ActiveDeployment.VirtualFolder.length > 0 ? '/' + Apps.ActiveDeployment.VirtualFolder : '';
+        let hostUrl = webRoot + port + virtualFolder;
+
+        Apps.WebServiceXML(hostUrl + '/api/admin/Authenticate', function (resultString) {
+
+            let result = JSON.parse(resultString);
+            let authenticationData = result.Data; //Type of Models.Common.AuthenticationData
+
+            sessionStorage.setItem('AuthenticationData', JSON.stringify(authenticationData));
+
+            Apps.ActiveDeployment.Debug = result.Data.Debug;
+            Apps.ActiveDeployment.Version = result.Data.Version;
+
+            if (callback)
+                callback(authenticationData);
+        });
+    },
+    GetAuthenticationData: function () {
+        return JSON.parse(sessionStorage.getItem('AuthenticationData'));
+    },
+    LoadDeployment: function (callback) {
         Apps.LoadSettings();
 
         if (Apps.Ready)
@@ -60,48 +65,27 @@
 
             console.log('all resources loaded');
 
-            //Set up error dialog
-            if (Apps.Dialogs) {
-                Apps.Dialogs.Register2('AppsErrorDialog', {
-                    width: 500,
-                    height: 300,
-                    style: 'position:absolute;left:100px;top:100px;',
-                    title: { color: 'steelblue', text: 'Apps Error' },
-                    content: '',
+            Apps.LoadComponentsConfig(function () {
+
+                console.log('components config loaded');
+
+                ////Set up error dialog
+                Apps.Components.Common.Dialogs.Register('AppsErrorDialog', {
+                    title: 'Exception',
+                    size: 'full-width',
+                    templateid: 'templateMyDialog1',
                     saveclick: function (id) {
                         Apps.Dialogs.Close('AppsErrorDialog');
                     },
                     cancelclick: function (id) {
                         Apps.Dialogs.Close('AppsErrorDialog');
                     }
-
                 });
-            }
+                if (callback)
+                    callback()
 
-            Apps.LoadComponentsConfig(function () {
-
-                console.log('components config loaded');
             });
         });
-    },
-    LoadSettings: function () {
-
-        Apps.ApplyStringSearchAndReplaceExtension();
-
-        let deployment = Apps.ActiveDeployment;
-
-        Apps['Settings'] = {};
-        Apps.Settings['WebRoot'] = location.protocol + "//" + location.hostname;
-        Apps.Settings['Port'] = location.port;
-        Apps.Settings["Version"] = deployment.Version;
-        Apps.Settings['VirtualFolder'] = deployment.VirtualFolder.length > 0 ? '/' + deployment.VirtualFolder : '';
-        Apps.Settings['AppsRoot'] = deployment.AppsRoot;
-        Apps.Settings['Debug'] = deployment.Debug;
-        Apps.Settings['Test'] = deployment.Test;
-        //Full root
-        Apps.Settings.WebRoot = Apps.Settings.WebRoot + (Apps.Settings.Port.length > 0 ? ':' : '') + Apps.Settings.Port + Apps.Settings.VirtualFolder;
-
-        console.log('deployment settings applied');
     },
     ApplyStringSearchAndReplaceExtension: function () {
 
@@ -115,9 +99,27 @@
             });
         };
     },
+    LoadSettings: function () {
+
+        Apps.ApplyStringSearchAndReplaceExtension();
+
+        let deployment = Apps.ActiveDeployment;
+
+        Apps['Settings'] = {};
+        Apps.Settings["Version"] = deployment.Version;
+        Apps.Settings['WebRoot'] = deployment.WebRoot;
+        Apps.Settings['Port'] = deployment.Port;
+        Apps.Settings['VirtualFolder'] = deployment.VirtualFolder.length > 0 ? '/' + deployment.VirtualFolder : '';
+        Apps.Settings['AppsRoot'] = deployment.AppsRoot;
+        Apps.Settings['Debug'] = deployment.Debug;
+        Apps.Settings['Required'] = deployment.Required;
+        Apps.Settings['UseServer'] = deployment.UseServer;
+        Apps.Settings.WebRoot = Apps.Settings.WebRoot + (deployment.Port.length > 0 ? ':' : '') + Apps.Settings.Port + Apps.Settings.VirtualFolder;
+        console.log('deployment settings applied');
+    },
     LoadResources: function (callback) {
 
-        Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Resources/' + Apps.ResourcesConfigFileName, function (response) {
+        Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Resources/resources.json?version=' + Apps.Settings.Version, function (response) {
 
             Apps.Resources = JSON.parse(response);
 
@@ -126,10 +128,12 @@
             let resourceArray = Apps.Resources.Resources; //Object.values(Apps.Resources.Resources);
 
             for (let x = 0; x < resourceArray.length; x++) {
-                if (resourceArray[x].ModuleType === 'script')
-                    scriptResources.push(resourceArray[x]);
-                else
-                    nonScriptResources.push(resourceArray[x]);
+                if (resourceArray[x].Enabled) {
+                    if (resourceArray[x].ModuleType === 'script')
+                        scriptResources.push(resourceArray[x]);
+                    else
+                        nonScriptResources.push(resourceArray[x]);
+                }
             }
 
             console.log('resources loading begin');
@@ -187,7 +191,7 @@
 
                 Apps.CountDownScriptResources.count++;
 
-                Apps.LoadScript(resourcesFolder + '/' + r.FileName, function () {
+                Apps.LoadScript(resourcesFolder + '/' + r.FileName + '?version=' + Apps.Settings.Version, function () {
 
                     console.log('Script: loading next ' + r.FileName);
 
@@ -229,7 +233,7 @@
 
             let resourcesFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Resources';
             let fileName = notDone[0].FileName;
-            Apps.LoadScript(resourcesFolder + '/' + fileName, function () {
+            Apps.LoadScript(resourcesFolder + '/' + fileName + '?version=' + Apps.Settings.Version, function () {
 
                 console.log('Script: loading first ' + fileName);
                 Apps.LoadFirstScripts(loadFirsts, callback);
@@ -254,7 +258,7 @@
             if (r.Enabled) {
                 if (r.ModuleType === 'require') {
                     Apps.CountDownResources.count++;
-                    require([resourcesFolder + '/' + r.FileName], function (resource) {
+                    require([resourcesFolder + '/' + r.FileName + '?version=' + Apps.Settings.Version], function (resource) {
 
                         if (r.ModuleName) {
                             Apps[r.ModuleName] = resource;
@@ -273,21 +277,21 @@
                 //            Apps.CountDownResources.check();
                 //        });
                 //}
-                else if (r.ModuleType === 'require') {
-                    Apps.CountDownResources.count++;
-                    require([resourcesFolder + '/' + r.FileName], function (obj) {
-                        Apps.CountDownResources.check();
-                    });
-                }
+                //else if (r.ModuleType === 'require') {
+                //    Apps.CountDownResources.count++;
+                //    require([resourcesFolder + '/' + r.FileName], function (obj) {
+                //        Apps.CountDownResources.check();
+                //    });
+                //}
                 else if (r.ModuleType === 'script') {
                     Apps.CountDownResources.count++;
-                    Apps.LoadScript(resourcesFolder + '/' + r.FileName, function () {
+                    Apps.LoadScript(resourcesFolder + '/' + r.FileName + '?version=' + Apps.Settings.Version, function () {
                         Apps.CountDownResources.check();
                     });
                 }
                 else if (r.ModuleType === 'style') {
                     Apps.CountDownResources.count++;
-                    Apps.LoadStyle(resourcesFolder + '/' + r.FileName, function () {
+                    Apps.LoadStyle(resourcesFolder + '/' + r.FileName + '?version=' + Apps.Settings.Version, function () {
                         Apps.CountDownResources.check();
                     });
                 }
@@ -304,7 +308,7 @@
 
             console.log('loading components: auto mode');
 
-            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/' + Apps.ComponentsConfigFileName, function (response) {
+            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.json?version=' + Apps.Settings.Version, function (response) {
 
                 var components = JSON.parse(response);
                 let componentsFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components';
@@ -335,31 +339,33 @@
 
         Apps.CountDownComponents.count++;
 
-        components.forEach(function (c, index) {
+        if (components) {
+            components.forEach(function (c, index) {
 
-            //if (c.Load && c.ModuleType === 'es6') {
+                //if (c.Load && c.ModuleType === 'es6') {
 
-            //    console.log('loading component: ' + c.Name + ' (via ' + c.ModuleType + ')');
-            //    Apps.CountDownComponents.count++;
-            //    import(componentUrl).then((cObj) => {
-            //        Apps.LoadComponent(parentComponent, cObj, c);
-            //        Apps.LoadComponents(cObj, c.Components, componentsFolder + '/' + c.Name + '/Components');
-            //        Apps.CountDownComponents.check();
-            //    });
-            //}
-            if (c.Load && c.ModuleType === 'require') {
+                //    console.log('loading component: ' + c.Name + ' (via ' + c.ModuleType + ')');
+                //    Apps.CountDownComponents.count++;
+                //    import(componentUrl).then((cObj) => {
+                //        Apps.LoadComponent(parentComponent, cObj, c);
+                //        Apps.LoadComponents(cObj, c.Components, componentsFolder + '/' + c.Name + '/Components');
+                //        Apps.CountDownComponents.check();
+                //    });
+                //}
+                if (c.Load && c.ModuleType === 'require') {
 
-                console.log('loading component: ' + c.Name + ' (via ' + c.ModuleType + ')');
+                    console.log('loading component: ' + c.Name + ' (via ' + c.ModuleType + ')');
 
-                Apps.CountDownComponents.count++;
-                require([componentsFolder + '/' + c.Name + '/' + c.Name + '.js'], function (cObj) {
-                    Apps.LoadComponent(parentComponent, cObj, c);
-                    Apps.LoadComponents(cObj, c.Components, componentsFolder + '/' + c.Name + '/Components');
-                    Apps.CountDownComponents.check();
-                });
-            }
+                    Apps.CountDownComponents.count++;
+                    require([componentsFolder + '/' + c.Name + '/' + c.Name + '.js?version=' + Apps.Settings.Version], function (cObj) {
+                        Apps.LoadComponent(parentComponent, cObj, c);
+                        Apps.LoadComponents(cObj, c.Components, componentsFolder + '/' + c.Name); // + '/Components');
+                        Apps.CountDownComponents.check();
+                    });
+                }
 
-        });
+            });
+        }
         Apps.CountDownComponents.check();
     },
     LoadComponent: function (parentComponent, c, config) {
@@ -403,7 +409,7 @@
         var fileref = document.createElement("link");
         fileref.setAttribute("rel", "stylesheet");
         fileref.setAttribute("type", "text/css");
-        fileref.setAttribute("href", filename + '?version=' + Apps.ActiveDeployment.Version);
+        fileref.setAttribute("href", filename + '?version=' + Apps.Settings.Version);
         document.getElementsByTagName("head")[0].appendChild(fileref);
 
         if (callback)
@@ -432,19 +438,80 @@
         //});
     },
     LoadTemplateAndStyle: function (componentName, callback) {
-        //Works for top level only right now
-        Apps.LoadTemplate(componentName, Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/' + componentName + '/' + componentName + '.html', function () {
-            Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/' + componentName + '/' + componentName + '.css');
+        let componentRoot = Apps.Settings.WebRoot + '/Scripts/Apps/Components/' + componentName + '/' + componentName;
+        Apps.LoadTemplate(componentName, componentRoot + '.html?ver=' + Apps.Settings.Version, function () {
+            Apps.LoadStyle(componentRoot + '.css?ver=' + Apps.Settings.Version);
+
             if (callback)
                 callback();
         });
     },
-    BindTemplate: function (templateId, argsArray) {
-        var content = $("#" + templateId).html();
-        if (argsArray) {
-            content = content.SearchAndReplace.apply(content, argsArray);
+    //BindTemplate: function (templateId, argsArray) {
+    //    var content = $("#" + templateId).html();
+    //    if (argsArray) {
+    //        content = content.SearchAndReplace.apply(content, argsArray);
+    //    }
+    //    return content;
+    //},
+    //Drops all template tags contained in a given file on body (does not check for already loaded)
+    DropTemplateFile: function (path, callback) {
+        Apps.Download(path + '?version=' + Apps.ActiveDeployment.Version, function (content) {
+            //drop all templates in this file, if not already
+            $.each($(content), function (index, el) {
+                if (!document.getElementById(el.id)) {
+                    document.body.appendChild(el);
+                }
+            });
+            if (callback)
+                callback();
+        });
+    },
+    //Loads script-tagged template from disk (once) and applies data
+    BindTemplate: function (templateId, path, argsArray, callback) {
+        var content = '';
+
+        //Download if template not already dropped on page
+        if (!document.getElementById(templateId)) {
+
+            Apps.Download(path + '?version=' + Apps.ActiveDeployment.Version, function (content) {
+
+                //drop all templates in this file, if not already
+                $.each($(content), function (index, el) {
+                    if (!document.getElementById(el.id)) {
+                        document.body.appendChild(el);
+                    }
+                });
+
+                //get bound content for this particular template
+                content = $("#" + templateId).html();
+
+                if (argsArray) {
+                    content = content.SearchAndReplace.apply(content, argsArray);
+                    if (callback)
+                        callback(content);
+                }
+                else {
+                    if (callback)
+                        callback(content);
+                }
+
+            });
         }
-        return content;
+        else {
+            //get bound content for this particular template
+            content = $("#" + templateId).html();
+
+            if (argsArray) {
+                content = content.SearchAndReplace.apply(content, argsArray);
+                if (callback)
+                    callback(content);
+            }
+            else {
+                if (callback)
+                    callback(content);
+            }
+
+        }
     },
     LoadScript: function (url, callback) {
         var script = document.createElement('script');
@@ -506,7 +573,7 @@
                 Apps.ComponentsReady();
 
                 if (Apps.ActiveDeployment.Debug)
-                    Apps.Notify('info', 'Debug mode is enabled.');
+                    Apps.Notify('warning', 'Debug configuration is enabled.');
                 if (Apps.ActiveDeployment.Test)
                     Apps.Notify('warning', 'Test mode is enabled.');
             }
@@ -632,6 +699,56 @@
             Apps.HandleAjaxResult(error, result, callback);
         }, false);
     },
+    PostSync: function (url, dataString, callback) {
+        Apps.Ajax('POST', url, dataString, function (error, result) {
+            Apps.HandleAjaxResult(error, result, callback);
+        }, null, true);
+
+        //$.ajax({
+        //    type: 'POST',
+        //    url: url,
+        //    data: dataString,
+        //    contentType: 'application/json; charset=utf-8',
+        //    dataType: 'json',
+        //    async: false,
+        //    success: function (result) {
+        //        if (callback)
+        //            callback(false, result);
+        //    },
+        //    error: function (result) {
+        //        if (callback)
+        //            callback(true, result);
+        //    }
+        //});
+    },
+    WebService: function (wsUrl, data, callback) {
+        $.ajax({
+            type: 'POST',
+            url: wsUrl, //Apps.Settings.WebRoot + '/DriversLicenseWebService.asmx/ValidateDriversLicense',
+            data: data, // "{ driversLicense: '" + licenseNumber + "' }",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                Apps.HandleAjaxResult(false, data.d, callback);
+            },
+            error: function (data) {
+                Apps.HandleAjaxResult(true, data.d, callback);
+            }
+        });
+
+    },
+    WebServiceXML: function (path, callback) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                if (callback)
+                    callback(this.response);
+            }
+        };
+        xhttp.open('POST', path, true);
+        xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        xhttp.send();
+    },
     HandleAjaxResult: function (error, result, callback) {
         //Handle result
         if (!error) {
@@ -641,15 +758,34 @@
                     callback(result);
             }
             else {
-                Apps.Notify('warning', 'A problem happened while trying to doing that. See the error dialog for more information.');
-                Apps.Dialogs.Content('AppsErrorDialog', '<textarea style="width:100%; height:155px;">' + JSON.stringify(result) + '</textarea>');
-                Apps.Dialogs.Open('AppsErrorDialog');
+
+                //Check if want to send a custom message along with failure
+                if (!result.ShowFailMessage) {
+                    Apps.Notify('warning', 'A problem happened while trying to do that. See the error dialog and/or logs for more information.');
+
+                    if (Apps.Settings.Debug) {
+                        Apps.Components.Common.Dialogs.Content('AppsErrorDialog', '<textarea style="width:100%; height:155px;">' + JSON.stringify(result) + '</textarea>');
+                        Apps.Components.Common.Dialogs.Open('AppsErrorDialog');
+                    }
+                }
+                else {
+                    Apps.Notify('warning', result.FailMessage);
+                }
+
+                if (callback)
+                    callback(result);
             }
         }
         else {
-            Apps.Notify('warning', 'An exception happened while trying to doing that. See the error dialog for more information.');
-            Apps.Dialogs.Content('AppsErrorDialog', '<textarea style="width:100%; height:155px;">' + JSON.stringify(result) + '</textarea>');
-            Apps.Dialogs.Open('AppsErrorDialog');
+            Apps.Notify('warning', 'An exception happened during the last operation. See the error dialog and logs for more information.');
+
+            if (Apps.Settings.Debug) {
+                Apps.Components.Common.Dialogs.Content('AppsErrorDialog', JSON.stringify(result));
+                Apps.Components.Common.Dialogs.Open('AppsErrorDialog');
+            }
+
+            if (callback)
+                callback(result);
         }
     },
     Auth: function (url, token, by, callback) {
@@ -694,11 +830,11 @@
             },
             async: !sync,
             success: function (result) {
-                if (callback !== null)
+                if (callback)
                     callback(false, result, successCallback);
             },
             error: function (result) {
-                if (callback !== null)
+                if (callback)
                     callback(true, result);
             }
         });
@@ -750,20 +886,24 @@ Apps.Template = function (settings) {
     //this.Selector.html(settings.data);
     this.Load = function (content) {
 
-        if (!document.getElementById(this.TemplateID)) {
+        //content is the entire component html file contents
 
+        if (!document.getElementById(this.TemplateID)) { //Main component div exists already?
+
+            //Put main component div on body
             let templateNode = document.createElement('div');
             templateNode.id = this.TemplateID;
             templateNode.style.display = "none";
             document.body.appendChild(templateNode); //Put template on dom first
 
+            //The selector is the main component div
             this.Selector = document.getElementById(this.TemplateID);
 
+            //Create a template element to hold content until needed/shown
             this.Template = document.createElement('script');
             this.Template.id = 'template' + this.TemplateID;
             this.Template.type = "text/template";
             this.Template.innerHTML = content;
-
             this.Selector.appendChild(this.Template); //Puts template inside div container (not template inner html)
         }
     };
@@ -771,12 +911,13 @@ Apps.Template = function (settings) {
     this.Drop = function (argsArray) {
         //Get template html and drop to dom and reload selector
         // var content = Apps.Util.DropTemplate(this.TemplateID);
-        if (!document.getElementById('content' + this.TemplateID)) {
+       // if (!document.getElementById('content' + this.TemplateID)) {
 
             this.Selector = document.getElementById(this.TemplateID);
+        let template = this.Selector.children[0];
 
             //Gets html from template and puts inside container div (exposing it)
-            var content = this.Template.innerHTML; // this.Selector.find('div').html();
+        var content = template.innerHTML; // this.Selector.innerHTML; // this.Selector.find('div').html();
 
             if (argsArray)
                 content = content.SearchAndReplace.apply(content, argsArray);
@@ -787,8 +928,8 @@ Apps.Template = function (settings) {
             contentDiv.classList = this.TemplateID + 'ContentStyle';
             contentDiv.innerHTML = content;
 
-            $(this.Selector).append(contentDiv);
-        }
+            this.Selector.appendChild(contentDiv);
+        //}
 
 
         // if($(content).length === 0)

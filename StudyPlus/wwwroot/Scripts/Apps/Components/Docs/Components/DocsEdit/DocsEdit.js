@@ -5,78 +5,84 @@ define([], function () {
         Name: 'DocsEdit',
         Doc: null,
         SelectedFile:null,
-        Initialize: function () {
+        Initialize: function (callback) {
 
             //Apps.Debug.Trace(this);
 
-            //Apps.LoadTemplate('DocsEdit', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/AutoComponents/DocsEdit/DocsEdit.html', function () {
+            Apps.LoadTemplate('DocsEdit', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.html', function () {
 
-            //    Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/DocsEdit/DocsEdit.css');
-            //    Apps.Components.DocsEdit.Event('view');
-            //});
+                Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.css');
+
+                Apps.UI.DocsEdit.Drop();
+                Apps.UI.DocsEdit.Show();
+
+                if (callback)
+                    callback();
+            });
 
         },
         Show: function(doc)
         {
+            Me.Initialize(function () {
+                doc = JSON.parse(unescape(doc));
+                Me.Doc = doc;
 
-            doc = JSON.parse(unescape(doc));
-            Me.Doc = doc;
+                //Apps.Debug.Trace(this);
+                //Apps.UI.DocsEdit.Show();
+                Apps.Util.CenterAbsolute($('#divDocsEditContent'));
 
-            Apps.Debug.Trace(this);
-            Apps.UI.DocsEdit.Show();
-            Apps.Util.CenterAbsolute($('#divDocsEditContent'));
+                $('#txtDocContent').jqte();
+                $('.jqte_editor').css('min-height', '300px');
 
-            $('#txtDocContent').jqte();
-            $('.jqte_editor').css('min-height', '300px');
+                $('#spanDocsEdit_DocName').text('Edit Doc #' + doc.DocID);
+                $('#DocsEdit_DocDates').text('Created ' + Apps.Util.FormatDateTime2(doc.Created) + ' Last Updated ' + Apps.Util.FormatDateTime2(doc.Updated));
+                $('#txtDocTitle').val(doc.DocTitle);
+                $('.jqte_editor').html(doc.DocContent);
 
-            $('#spanDocsEdit_DocName').text('Edit Doc #' + doc.DocID);
-            $('#DocsEdit_DocDates').text('Created ' + Apps.Util.FormatDateTime2(doc.Created) + ' Last Updated ' + Apps.Util.FormatDateTime2(doc.Updated));
-            $('#txtDocTitle').val(doc.DocTitle);
-            $('.jqte_editor').html(doc.DocContent);
-
-            $('#btnSaveDoc').off().on('click',function (event) {
-                var buttonDoc = doc;
-                Apps.AutoComponents.Docs.Save(buttonDoc);
-            });
-
-            $('#btnArchiveDoc').off().on('click', function (event) {
-
-                if (confirm('Are you sure?')) {
+                $('#btnSaveDoc').off().on('click', function (event) {
                     var buttonDoc = doc;
-                    buttonDoc.Archived = true;
-                    Apps.AutoComponents.Docs.Save(buttonDoc);
-                }
-            });
-            //Tags
-            Me.Event('refresh_tags');
+                    Apps.Components.Docs.Save(buttonDoc);
+                });
 
-            Apps.Util.Get('/api/Docs/GetTags', function (error, result) {
-                Apps.Util.RefreshCombobox(result.Data, 'DocsEdit_selectDocsEditTags', 0, 'Select a Tag', 'TagID', 'Name', function (error, result) {
-                    //on change
-                    let selectedTagId = $('#DocsEdit_selectDocsEditTags').val();
-                    if (selectedTagId > 0) {
-                        Apps.Util.Get('/api/Docs/UpsertDocTags?docId=' + Me.Doc.DocID + '&tagId=' + selectedTagId, function (error, result) {
+                $('#btnArchiveDoc').off().on('click', function (event) {
 
-                            Apps.Notify('success', 'New tag added!');
-                            Me.Event('refresh_tags');
-
-                        });
+                    if (confirm('Are you sure?')) {
+                        var buttonDoc = doc;
+                        buttonDoc.Archived = true;
+                        Apps.Components.Docs.Save(buttonDoc);
                     }
                 });
-            });
-            //Set upload iframe source
-            $('#iframeUploadForm').attr('src', Apps.Settings.WebRoot + '/Scripts/Apps/AutoComponents/Docs/Modules/DocsEdit/fileupload.html');
+                //Tags
+                Me.Event('refresh_tags');
 
-            Me.Event('cancel_new_file');
-            Me.Event('refresh_files');
+                Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetTags', function (error, result) {
+                    Apps.Util.RefreshCombobox(result.Data, 'DocsEdit_selectDocsEditTags', 0, 'Select a Tag', 'TagID', 'Name', function (error, result) {
+                        //on change
+                        let selectedTagId = $('#DocsEdit_selectDocsEditTags').val();
+                        if (selectedTagId > 0) {
+                            Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/UpsertDocTags?docId=' + Me.Doc.DocID + '&tagId=' + selectedTagId, function (error, result) {
+
+                                Apps.Notify('success', 'New tag added!');
+                                Me.Event('refresh_tags');
+
+                            });
+                        }
+                    });
+                });
+                //Set upload iframe source
+                $('#iframeUploadForm').attr('src', Apps.Settings.WebRoot + '/Scripts/Apps/Components/Docs/Components/DocsEdit/fileupload.html');
+
+                Me.Event('cancel_new_file');
+                Me.Event('refresh_files');
+            });
         },
         Hide: function()
         {
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
             Apps.UI.DocsEdit.Hide();
         },
         RefreshFiles: function () {
-            Apps.Pages.DocsEdit.Event('refresh_files');
+            Apps.Components.Docs.DocsEdit.Event('refresh_files');
         },
         removeDuplicates: function (str) {
             //input string eg AbraCadABraAlakAzam
@@ -91,7 +97,7 @@ define([], function () {
             console.log(result);
         },
         Event: function (sender, args) {
-            Apps.Debug.Trace(this, 'DocsEdit Event: ' + sender);
+           // Apps.Debug.Trace(this, 'DocsEdit Event: ' + sender);
 
             switch (sender) {
                 case 'view':
@@ -101,7 +107,7 @@ define([], function () {
 
                 case 'hide':
 
-                    Apps.Pages.DocsEdit.Hide();
+                    Apps.Components.Docs.DocsEdit.Hide();
                     break;
 
                 case 'refresh_tags':
@@ -110,7 +116,7 @@ define([], function () {
                         $('#DocsEdit_docTags').empty();
                         $.each(result.Data, function (index, tag) {
                             let docTagHtml = '<span class="badge badge-light">' + tag.Name + '</span>';
-                            docTagHtml += '<span style="cursor:pointer;" onclick="Apps.Pages.DocsEdit.Event(\'remove_doctag\',' + Me.Doc.DocID + ',' + tag.TagID + ');">X</span>';
+                            docTagHtml += '<span style="cursor:pointer;" onclick="Apps.Components.Docs.DocsEdit.Event(\'remove_doctag\',' + Me.Doc.DocID + ',' + tag.TagID + ');">X</span>';
                             $('#DocsEdit_docTags').append(docTagHtml);
                         });
 
@@ -150,8 +156,8 @@ define([], function () {
 
                     $(iframe.find('#uploadForm')[0]).on('submit', function (e) {
                         
-                        Apps.Pages.DocsEdit.Event('cancel_new_file');
-                        setTimeout(Apps.Pages.DocsEdit.RefreshFiles, 2000);
+                        Apps.Components.Docs.DocsEdit.Event('cancel_new_file');
+                        setTimeout(Apps.Components.Docs.DocsEdit.RefreshFiles, 2000);
                     });
                     break;
                 case 'upload_files':

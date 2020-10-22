@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudyPlus.Models;
+using StudyPlus.Models.StudyBooks;
 
 namespace StudyPlus.Controllers
 {
@@ -27,15 +28,15 @@ namespace StudyPlus.Controllers
         public Result New()
         {
             var result = new Result();
-
+            var newBook = new StudyBook();
             try
             {
                 using (var db = new LiteDatabase(studyBooksDB))
                 {
-                    var table = db.GetCollection<Doc>("StudyBook");
-                    table.Upsert(doc);
+                    var table = db.GetCollection<StudyBook>("StudyBook");
+                    table.Upsert(newBook);
 
-                    result.Data = doc;
+                    result.Data = newBook;
                     result.Success = true;
                 }
             }
@@ -44,8 +45,67 @@ namespace StudyPlus.Controllers
                 result.Data = ex;
             }
 
+            return result;
+        }
+        [Route("List")]
+        public Result List()
+        {
+            var result = new Result();
+            try
+            {
+                using (var db = new LiteDatabase(studyBooksDB))
+                {
+                    result.Data = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList();
+                    result.Success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Data = ex;
+            }
 
             return result;
         }
+        [Route("Book")]
+        public Result Book(int bookId)
+        {
+            var result = new Result();
+            try
+            {
+                using (var db = new LiteDatabase(studyBooksDB))
+                {
+                    result.Data = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList().Where(b => b.ID == bookId);
+                    result.Success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Data = ex;
+            }
+
+            return result;
+        }
+        [Route("SaveBook")][HttpPost]
+        public Result SaveBook([FromBody] StudyBook book)
+        {
+            var result = new Result();
+            try
+            {
+                using (var db = new LiteDatabase(studyBooksDB))
+                {
+                    var books = db.GetCollection<StudyBook>("StudyBook"); //.FindAll().ToList().Where(b => b.ID == bookId);
+                    books.Upsert(book);
+                    result.Data = book;
+                    result.Success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Data = ex;
+            }
+
+            return result;
+        }
+
     }
 }

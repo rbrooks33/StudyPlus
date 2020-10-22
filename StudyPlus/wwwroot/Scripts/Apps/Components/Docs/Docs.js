@@ -21,65 +21,77 @@
         Initialize: function (callback) {
             //Apps.Debug.Trace(this, 'Start.');
 
-            //Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/AutoComponents/Docs/Docs.html', function () {
+            require([Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.min.js'], function (jqte) {
 
-            //    Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/AutoComponents/Docs/Docs.css');
+                Apps.JQTE = $.fn.jqte; // Reference appears to get lost across modules. Use "$.fn.jqte = Apps.JQTE" to get it back.
 
-            //    if (callback)
-            //        callback();
+                Apps.LoadStyle(Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.css');
 
-            //});
+                if (callback)
+                    callback();
+            });
+
+            Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.html', function () {
+
+                Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.css');
+
+                if (callback)
+                    callback();
+
+            });
 
         },
         Show: function () {
 
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
 
-            var pagesRoot = Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules';
-            Apps.RegisterPages([
-                { name: 'DocsEdit', pageroot: pagesRoot },
-                { name: 'DocTypes', pageroot: pagesRoot },
-                { name: 'LinkList', pageroot: pagesRoot },
-                { name: 'DocViewer', pageroot: pagesRoot },
-                { name: 'Tags', pageroot: pagesRoot },
-                { name: 'DocMove', pageroot: pagesRoot }
-            ]);
+            //var pagesRoot = Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules';
+            //Apps.RegisterPages([
+            //    { name: 'DocsEdit', pageroot: pagesRoot },
+            //    { name: 'DocTypes', pageroot: pagesRoot },
+            //    { name: 'LinkList', pageroot: pagesRoot },
+            //    { name: 'DocViewer', pageroot: pagesRoot },
+            //    { name: 'Tags', pageroot: pagesRoot },
+            //    { name: 'DocMove', pageroot: pagesRoot }
+            //]);
 
-            Apps.UI.Docs.Drop().Show();
+            Me.Initialize(function () {
 
-            Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetComputerName', function (error, result) {
+                Apps.UI.Docs.Drop().Show();
 
-                let computerName = result.Message;
+                Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetComputerName', function (error, result) {
 
-                Apps.Util.Get('/api/Docs/GetAllDocTags', function (error, result) {
+                    let computerName = result.Message;
 
-                    Me.DocTags = result.Data;
+                    Apps.Util.Get('/api/Docs/GetAllDocTags', function (error, result) {
 
-                    Me.RefreshReviews(function () {
+                        Me.DocTags = result.Data;
 
-                        Apps.AutoComponents.Docs.Handlers.Initialize("Local Docs");
+                        Me.RefreshReviews(function () {
 
-                        Me.Event('show_level_changed');
-                        
-                        //Me.RefreshParentDocs();
+                            Apps.Components.Docs.Handlers.Initialize("Local Docs");
 
-                        $('#spanDocsTitle').html('This computer\'s (' + computerName + ') documents');
-                        $('#spanDocsSubTitle').html('Doc Types are at ' + Apps.Settings.WebRoot + '/api/Docs/GetDocTypes').css('font-style', 'italic');
+                            Me.Event('show_level_changed');
 
-                        $('#txtDocIDSearch').off().on('keyup', function () {
-                            Apps.AutoComponents.Docs.Event('search_docid');
+                            //Me.RefreshParentDocs();
+
+                            $('#spanDocsTitle').html('This computer\'s (' + computerName + ') documents');
+                            $('#spanDocsSubTitle').html('Doc Types are at ' + Apps.Settings.WebRoot + '/api/Docs/GetDocTypes').css('font-style', 'italic');
+
+                            $('#txtDocIDSearch').off().on('keyup', function () {
+                                Apps.Components.Docs.Event('search_docid');
+                            });
+
+                            $('#txtDocContentSearch').off().on('keyup', function () {
+                                Apps.Components.Docs.Event('search_doccontent');
+                            });
+
+
+
                         });
-
-                        $('#txtDocContentSearch').off().on('keyup', function () {
-                            Apps.AutoComponents.Docs.Event('search_doccontent');
-                        });
-
-
-
                     });
                 });
             });
-
         },
         Hide: function () {
             Apps.UI.Docs.Hide();
@@ -88,7 +100,7 @@
         },
         RefreshParentDocs: function () {
 
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
 
             $("#divDocsContainer").empty();
 
@@ -101,45 +113,48 @@
             $('#spanDocs_ParentName').hide();
 
             //Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs', function (error, result) {
-            Apps.RegisterDataSingle({ name: 'Docs', path: Apps.Settings.WebRoot + '/api/Docs/GetDocs' }, function () {
+            //Apps.RegisterDataSingle({ name: 'Docs', path: Apps.Settings.WebRoot + '/api/Docs/GetDocs' }, function () {
+            Apps.Get2(Apps.Settings.WebRoot + '/api/Docs/GetDocs', function (result) {
 
-                var docs = Enumerable.From(Apps.Data.Docs.Data)
-                    .Where(function (d) { return d.Archived === false; })
-                    .ToArray();
+                if (result.Success) {
 
-                //.Where(function (d) { return d.docTypeID === 2 && d.archived === false })
-                //.OrderBy(function (s) { return s.ParentDocID; }).ToArray();
+                    var docs = Enumerable.From(result.Data)
+                        .Where(function (d) { return d.Archived === false; })
+                        .ToArray();
 
-                Me.Docs = docs; //save these corns for later
+                    //.Where(function (d) { return d.docTypeID === 2 && d.archived === false })
+                    //.OrderBy(function (s) { return s.ParentDocID; }).ToArray();
 
-                //GET DOCS WITH NO PARENT
-                Me.CurrentLevel = 0; // Me.BaseLevel; //Reset level start
+                    Me.Docs = docs; //save these corns for later
 
-                var ulNoParent = Me.RefreshDocChildren(docs, -1, 0);
-                $("#divDocsContainer").append(ulNoParent);
+                    //GET DOCS WITH NO PARENT
+                    Me.CurrentLevel = 0; // Me.BaseLevel; //Reset level start
 
-                //GET DOCS WITH PARENT
-                //var ul = Me.RefreshDocChildren(docs, Me.Doc.DocID);
-                //$("#divDocsContainer").append(ul);
+                    var ulNoParent = Me.RefreshDocChildren(docs, -1, 0);
+                    $("#divDocsContainer").append(ulNoParent);
 
-                if (Me.Expanded)
-                    Me.Expand();
-                else
-                    Me.Collapse();
+                    //GET DOCS WITH PARENT
+                    //var ul = Me.RefreshDocChildren(docs, Me.Doc.DocID);
+                    //$("#divDocsContainer").append(ul);
 
-                //require([Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/references/jquery-te-1.4.0.min.js'], function (jqte) {
-                //    if(jQuery.fn.jqte)
-                //        $(".editor").jqte();
-                //});
-                $.fn.jqte = Apps.JQTE;
-                $(".editor").jqte();
+                    if (Me.Expanded)
+                        Me.Expand();
+                    else
+                        Me.Collapse();
 
+                    //require([Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/references/jquery-te-1.4.0.min.js'], function (jqte) {
+                    //    if(jQuery.fn.jqte)
+                    //        $(".editor").jqte();
+                    //});
+                    $.fn.jqte = Apps.JQTE;
+                    $(".editor").jqte();
+
+                }
             });
-
         },
         RefreshChildDocs: function (parentDocId) {
 
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
 
             $('#spanDocs_ParentName').off().on('click', function () {
                 Me.Event('edit', escape(JSON.stringify(Me.Doc)));
@@ -158,11 +173,12 @@
             $('#divDocs_ParentContent').html(content);
 
             //Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs', function (error, result) {
-            Apps.RegisterDataSingle({ name: 'Docs', path: Apps.Settings.WebRoot + '/api/Docs/GetDocsByParent?parentDocId=' + parentDocId }, function () {
+            //Apps.RegisterDataSingle({ name: 'Docs', path: Apps.Settings.WebRoot + '/api/Docs/GetDocsByParent?parentDocId=' + parentDocId }, function () {
+            Apps.Get2(Apps.Settings.WebRoot + '/api/Docs/GetDocsByParent?parentDocId=' + parentDocId, function (result) {
 
                 //$("#divDocsContainer").empty(); //It appears some other collection is showing up
 
-                var docs = Enumerable.From(Apps.Data.Docs.Data)
+                var docs = Enumerable.From(result.Data)
                     .Where(function (d) { return d.Archived === false; })
                     .ToArray();
 
@@ -194,7 +210,7 @@
         },
         RefreshDocChildren: function (docs, parentId, depth) {
 
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
 
             var childDocs = Enumerable.From(docs)
                 .Where(function (s) {
@@ -211,10 +227,10 @@
             var li = '<ul style="margin-left:-44px;">';
 
             $.each(childDocs, function (index, doc) {
-                li += '<li id="li_' + doc.DocID + '" style="list-style:none;" draggable="true" ondragstart="Apps.AutoComponents.Docs.drag(event)" ondrop="Apps.AutoComponents.Docs.drop(event)" ondragover="Apps.AutoComponents.Docs.allowDrop(event)">';
+                li += '<li id="li_' + doc.DocID + '" style="list-style:none;" draggable="true" ondragstart="Apps.Components.Docs.drag(event)" ondrop="Apps.AutoComponents.Docs.drop(event)" ondragover="Apps.AutoComponents.Docs.allowDrop(event)">';
                 li += '<table style="-webkit-border-vertical-spacing: 0.5em;border-collapse:separate;width:100%;">';
                 li += '    <tr>';
-                li += '        <td class="Docs_DocTitleCell" onclick="Apps.AutoComponents.Docs.Event(\'show_child_docs\',' + doc.DocID + ');">';
+                li += '        <td class="Docs_DocTitleCell" onclick="Apps.Components.Docs.Event(\'show_child_docs\',' + doc.DocID + ');">';
                 li += '            <span class="Docs_DocTitleTagsSpan">#' + doc.DocID + ' (' + doc.ChildCount + ' Docs)</span>';
                 li += '            <br /><span class="Docs_DocTitleCellTitle">' + doc.DocTitle + '</span>';
                 //li += doc.DocTitle;
@@ -248,14 +264,14 @@
                 let opacity = doc.Archived ? .5 : 1;
                 li += '        <td class="Docs_ButtonCell" style="opacity:' + opacity + ';">';
                 li += '          <div class="btn-group">';
-                li += '          <span onclick="Apps.AutoComponents.Docs.Event(\'show_content\',' + doc.DocID + ');" class="btn btn-primary fa fa-square-o" style="float:right;cursor:pointer;" />';
-                li += '          <span onclick="Apps.AutoComponents.Docs.Event(\'hide_content\',' + doc.DocID + ');" class="btn btn-primary fa fa-bars" style="float:right;cursor:pointer;display:none;" />';
+                li += '          <span onclick="Apps.Components.Docs.Event(\'show_content\',' + doc.DocID + ');" class="btn btn-primary fa fa-square-o" style="float:right;cursor:pointer;" />';
+                li += '          <span onclick="Apps.Components.Docs.Event(\'hide_content\',' + doc.DocID + ');" class="btn btn-primary fa fa-bars" style="float:right;cursor:pointer;display:none;" />';
                 //li += '          <span class="btn btn-primary" onclick="Apps.AutoComponents.Docs.Event(\'show_child_docs\',' + doc.DocID + ');">';
                 //li += doc.ChildCount;
                 //li += '          </span>';
-                li += '            <span onclick="Apps.AutoComponents.Docs.Event(\'edit\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-primary fa fa-pencil-square-o"></span>';
-                li += '            <span onclick="Apps.AutoComponents.Docs.Event(\'new_child\',\'' + doc.DocID + '\');" class="btn btn-primary fa fa-plus"></span>';
-                li += '            <input type="button" onclick="Apps.AutoComponents.Docs.Event(\'doc_move\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-primary" value="..." />';
+                li += '            <span onclick="Apps.Components.Docs.Event(\'edit\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-primary fa fa-pencil-square-o"></span>';
+                li += '            <span onclick="Apps.Components.Docs.Event(\'new_child\',\'' + doc.DocID + '\');" class="btn btn-primary fa fa-plus"></span>';
+                li += '            <input type="button" onclick="Apps.Components.Docs.Event(\'doc_move\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-primary" value="..." />';
 
                 let reviewCount = Enumerable.From(Me.DocReviews)
                     .Where(function (r) { return r.DocID === doc.DocID; })
@@ -263,11 +279,11 @@
 
                 let reviewOpacity = reviewCount > 0 ? 1 : .5;
 
-                li += '          <input type="button" onclick="Apps.AutoComponents.Docs.Event(\'reviewed\',\'' + doc.DocID + '\');" class="btn btn-success" style="opacity:' + reviewOpacity + ';border-bottom:" value="' + reviewCount + '" />';
+                li += '          <input type="button" onclick="Apps.Components.Docs.Event(\'reviewed\',\'' + doc.DocID + '\');" class="btn btn-success" style="opacity:' + reviewOpacity + ';border-bottom:" value="' + reviewCount + '" />';
                 if (!doc.Archived)
-                    li += '            <input type="button" onclick="Apps.AutoComponents.Docs.Event(\'archive\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-danger" title="Live. Click to archive." value="A" />';
+                    li += '            <input type="button" onclick="Apps.Components.Docs.Event(\'archive\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-danger" title="Live. Click to archive." value="A" />';
                 else
-                    li += '            <input type="button" onclick="Apps.AutoComponents.Docs.Event(\'unarchive\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-success" title="Archived. Click to restore." value="A" />';
+                    li += '            <input type="button" onclick="Apps.Components.Docs.Event(\'unarchive\',\'' + escape(JSON.stringify(doc)) + '\');" class="btn btn-success" title="Archived. Click to restore." value="A" />';
                 li += '          </div>';
                 li += '        </td>';
                 li += '    </tr>';
@@ -294,7 +310,7 @@
             return li;
         },
         ShowDoc: function (docId) {
-            let pagesRoot = Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules';
+            let pagesRoot = Apps.Settings.AppsRoot + '/Components/Docs/Modules';
 
             Apps.RegisterPage({ name: 'DocViewer', pageroot: pagesRoot }, function () {
                 Apps.NotifySuccess('page registered.');
@@ -641,8 +657,8 @@
             var parentId = ev.currentTarget.id.split('_')[1];
             var docId = data.split('_')[1];
 
-            var doc = Apps.Util.Linq(Apps.AutoComponents.Docs.Docs, '$.DocID === ' + docId);
-            var parentDoc = Apps.Util.Linq(Apps.AutoComponents.Docs.Docs, '$.DocID === ' + parentId);
+            var doc = Apps.Util.Linq(Apps.Components.Docs.Docs, '$.DocID === ' + docId);
+            var parentDoc = Apps.Util.Linq(Apps.Components.Docs.Docs, '$.DocID === ' + parentId);
 
             if (doc.length === 1) {
 
@@ -772,7 +788,7 @@
         },
         Event: function (sender, args) {
 
-            Apps.Debug.Trace(this, sender);
+            //Apps.Debug.Trace(this, sender);
 
             switch (sender) {
 
@@ -780,17 +796,20 @@
 
                     //args is doctype obj
                     Apps.Pages.DocTypes.Hide();
-                    Apps.AutoComponents.Docs.RefreshDocs(args);
+                    Apps.Components.Docs.RefreshDocs(args);
                     $('#spanDocsTitle').text(Me.DocType.Name);
 
                     break;
 
                 case 'edit':
 
+                    require([Apps.Settings.WebRoot + '/Scripts/Apps/Components/Docs/Components/DocsEdit/DocsEdit.js'], function (docsEdit) {
                     //args is doctype obj
-                    Apps.RegisterPage({ name: 'DocsEdit', pageroot: Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules' }, function () {
+                    //Apps.RegisterPage({ name: 'DocsEdit', pageroot: Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules' }, function () {
 
-                        Apps.Pages.DocsEdit.Show(args);
+                        Apps.Components.Docs['DocsEdit'] = docsEdit;
+                        docsEdit.Show(args);
+                        //Apps.Pages.DocsEdit.Show(args);
 
                     });
 
@@ -803,7 +822,7 @@
 
                     Me.GetDocTypeByDocID(graphDoc.DocID, function (docType) {
                         Apps.RegisterPage({ name: 'LinkList', pageroot: Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules' }, function () {
-                            Apps.AutoComponents.Docs.Hide();
+                            Apps.Components.Docs.Hide();
                             Apps.Pages.LinkList.Show(graphDoc, docType[0]);
                         });
                     });
@@ -981,7 +1000,7 @@
                     //Apps.Notify('success', 'base level: ' + Me.BaseLevel);
 
                     $('#btnAddProjectDoc').off().click(function (e) {
-                        Apps.AutoComponents.Docs.AddChildDoc();
+                        Apps.Components.Docs.AddChildDoc();
                     });
 
                     Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetDoc?docId=' + args, function (error, result) {

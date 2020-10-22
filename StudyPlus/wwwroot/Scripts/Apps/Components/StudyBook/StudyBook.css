@@ -1,0 +1,15 @@
+﻿.StudyBook_BookViewer {
+    position: absolute;
+    left: 10%;
+    top: 15%;
+    border: 3px solid rgb(52, 152, 219);
+    border-radius: 5px;
+    padding: 10px;
+    width: 500px;
+    height: 500px;
+    z-index: 200;
+    background: white;
+}
+.StudyBook_BookViewer_EditMode {
+    opacity:0;
+}

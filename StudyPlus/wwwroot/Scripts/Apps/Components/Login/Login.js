@@ -30,14 +30,14 @@ define([], function () {
                                 Me.HideElement('Login_DelegationMadeEasy', 1500, function () {
 
                                     $('#Login_WelcomeTo').animate({ opacity: 0, left: '-150px', top: '-100px' }, 400, 'swing', function () {
-
+                                        $('#Login_WelcomeTo').css('display', 'none');
                                     });
 
                                     $('#Login_KeepOnWorking')
                                         .css('position', 'absolute')
                                         .animate({ left: '-=100px', top: '-=250px' }, 400, 'swing', function () {
                                             Me.Resize();
-                                            Me.ShowDocs();
+                                            //Me.ShowDocs();
                                         });
                                 });
                             });

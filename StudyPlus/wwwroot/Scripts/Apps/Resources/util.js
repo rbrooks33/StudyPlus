@@ -68,6 +68,14 @@
             };
 
         },
+        Values: function (obj) {
+            //var obj = { foo: 'bar', baz: 42 };
+            var result = null;
+            var values = Object.keys(obj).map(function (e) {
+                result = obj[e]; //return obj[e]
+            });
+            return result;
+        },
         //Specify
         //1.) HTML file that contains template
         //2.) Template ID inside the file. ID will be then  be available in DOM.
@@ -155,14 +163,12 @@
         //var content = GetHTML('templateConditions', [index, conditionId, conditionName, "My Title"]);
         GetHTML: function (templateId, argsArray) {
             var content = $("#" + templateId).html();
-            if (content) {
-                if (argsArray) {
+            if (argsArray) {
+                if (content)
                     content = content.SearchAndReplace.apply(content, argsArray);
-                }
+                else
+                    console.warn('GetHTML content is empty although args exist. Template: ' + templateId);
             }
-            else
-                Apps.Notify('warning', 'Template "' + templateId + '" was not found.');
-
             return content; 
         },
         GetHTMLFromTemplate: function (templateId, templateFilePath, argsArray, callback) {
@@ -412,9 +418,18 @@
         IsInt: function (value) {
             return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value));
         },
-
+        IsDate: function (d) {
+            return typeof d.getMonth === 'function';
+        },
         IsNumber: function (value) {
-            return !isNaN(Number(value));
+            if (value === '')
+                return false;
+            else
+                return !isNaN(Number(value));
+        },
+        IsAlpha: function (ch) {
+            return typeof ch === "string" && ch.length === 1
+                && (ch >= "a" && ch <= "z" || ch >= "A" && ch <= "Z");
         },
         IsNormalInteger: function (str) {
             var n = Math.floor(Number(str));
@@ -558,6 +573,7 @@
             else
                 return "";
         },
+        Ticks: ((new Date().getTime() * 10000) + 621355968000000000),
         Middle: function (selector)
         {
             var result = { left: 0, top: 0 };

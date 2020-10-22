@@ -1,7 +1,7 @@
-﻿.Index_NewStudyDoc_Button {
-}
-.Index_Buttons {
+﻿.Index_StudyBookListContainer {
     float: right;
-    margin-top: 20px;
-    margin-right: 20px;
+    margin: 20px;
+}
+.Index_StudyBookList{
+    width:141px;
 }

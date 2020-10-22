@@ -12,6 +12,11 @@ namespace StudyPlus.Models.StudyBooks
         public int ID { get; set; }
         public string Title { get; set; }
         public string SubTitle { get; set; }
+        public bool Pinned { get; set; }
+        public decimal X { get; set; }
+        public decimal Y { get; set; }
+        public decimal Height { get; set; }
+        public decimal Width { get; set; }
         
     }
 }
