@@ -9,16 +9,18 @@
     <script>
         Apps.ComponentsReady = function () {
 
-            //Apps.LoadAutoComponent('Docs', function () {
+            Apps.Components.Docs.Initialize(function () { 
 
                 Apps.Components.Docs.Show();
 
-            //});
+            });
         };
 
     </script>
 </head>
 <body>
+    <div class="btn btn-primary fa fa-level-up" onclick="Apps.Components.Docs.Event('back_to_parent');"></div>
+
     <div id="divDocsContainer"></div>
 </body>
 </html>

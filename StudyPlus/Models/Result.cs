@@ -19,6 +19,8 @@ namespace StudyPlus.Models
         public bool Success { get; set; }
         public string Message { get; set; }
         public object Data { get; set; }
+        public bool ShowFailMessage { get; set; }
+        public string FailMessage { get; set; }
         public List<string> Messages { get; set; }
     }
 }

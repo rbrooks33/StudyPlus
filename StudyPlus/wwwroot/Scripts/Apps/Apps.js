@@ -894,7 +894,7 @@ Apps.Template = function (settings) {
             let templateNode = document.createElement('div');
             templateNode.id = this.TemplateID;
             templateNode.style.display = "none";
-            document.body.appendChild(templateNode); //Put template on dom first
+            //document.body.appendChild(templateNode); //Put template on dom first
 
             //The selector is the main component div
             this.Selector = document.getElementById(this.TemplateID);
@@ -904,7 +904,7 @@ Apps.Template = function (settings) {
             this.Template.id = 'template' + this.TemplateID;
             this.Template.type = "text/template";
             this.Template.innerHTML = content;
-            this.Selector.appendChild(this.Template); //Puts template inside div container (not template inner html)
+            //this.Selector.appendChild(this.Template); //Puts template inside div container (not template inner html)
         }
     };
 
@@ -923,13 +923,14 @@ Apps.Template = function (settings) {
                 content = content.SearchAndReplace.apply(content, argsArray);
 
 
+        if (!document.getElementById('content' + this.TemplateID)) {
             let contentDiv = document.createElement('div');
             contentDiv.id = 'content' + this.TemplateID;
             contentDiv.classList = this.TemplateID + 'ContentStyle';
             contentDiv.innerHTML = content;
 
             this.Selector.appendChild(contentDiv);
-        //}
+        }
 
 
         // if($(content).length === 0)

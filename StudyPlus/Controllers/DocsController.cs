@@ -333,6 +333,7 @@ namespace StudyPlus.Controllers
         public Result UpsertDoc([FromBody]Doc doc)
         {
             var result = new Result();
+            result.ShowFailMessage = true;
 
             try
             {
@@ -347,6 +348,7 @@ namespace StudyPlus.Controllers
             }
             catch (Exception ex)
             {
+                result.FailMessage = "Exception: " + ex.Message;
                 result.Data = ex;
             }
 

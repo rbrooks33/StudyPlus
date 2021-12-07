@@ -221,11 +221,13 @@ define([], function () {
                             filesTable += '    </td>';
                             filesTable += '    <td>';
                             filesTable += '        <a href="' + Apps.Settings.WebRoot + '/Images/Uploads/' + file.Name + file.Extension + '" target="_none">';
-                            if (file.Extension.toLowerCase() === '.pdf') {
-                                filesTable += '            <img src="' + Apps.Settings.WebRoot + '/Images/pdf.png" width="100" />';
+                            if (file.FileExists) {
+                                if (file.Extension.toLowerCase() === '.pdf') {
+                                    filesTable += '            <img src="' + Apps.Settings.WebRoot + '/Images/pdf.png" width="100" />';
+                                }
+                                else
+                                    filesTable += '            <img src="' + Apps.Settings.WebRoot + '/Images/Uploads/' + file.Name + file.Extension + '" width="100" />';
                             }
-                            else
-                                filesTable += '            <img src="' + Apps.Settings.WebRoot + '/Images/Uploads/' + file.Name + file.Extension + '" width="100" />';
                             filesTable += '        </a>';
                             filesTable += '    </td>';
                             filesTable += '    <td style="vertical-align:top;">';

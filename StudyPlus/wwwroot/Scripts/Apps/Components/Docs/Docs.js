@@ -118,6 +118,8 @@
 
                 if (result.Success) {
 
+                    $("#divDocsContainer").empty();
+
                     var docs = Enumerable.From(result.Data)
                         .Where(function (d) { return d.Archived === false; })
                         .ToArray();
@@ -231,7 +233,7 @@
                 li += '<table style="-webkit-border-vertical-spacing: 0.5em;border-collapse:separate;width:100%;">';
                 li += '    <tr>';
                 li += '        <td class="Docs_DocTitleCell" onclick="Apps.Components.Docs.Event(\'show_child_docs\',' + doc.DocID + ');">';
-                li += '            <span class="Docs_DocTitleTagsSpan">#' + doc.DocID + ' (' + doc.ChildCount + ' Docs)</span>';
+                li += '            <span class="Docs_DocTitleTagsSpan">#' + doc.DocID + ' | ' + (doc.DocContent ? doc.DocContent.length : '0') + ' bytes | ' + doc.ChildCount + ' Child Docs</span>';
                 li += '            <br /><span class="Docs_DocTitleCellTitle">' + doc.DocTitle + '</span>';
                 //li += doc.DocTitle;
                 let docTagHtml = '';
@@ -575,7 +577,7 @@
         },
         Refresh: function () {
 
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
 
             //if (Me.DocTypeID === 2)
             //    Me.RefreshProjectDocs(Me.Project);
@@ -587,7 +589,7 @@
         },
         RefreshDocs: function () {
 
-            Apps.Debug.Trace(this);
+            //Apps.Debug.Trace(this);
 
             $("#divDocsContainer").empty();
 
@@ -747,7 +749,7 @@
         },
         Save: function (doc) {
 
-            Apps.Debug.Trace(this, 'Using docid: ' + doc.DocID);
+           // Apps.Debug.Trace(this, 'Using docid: ' + doc.DocID);
 
             Me.Doc = doc;
             doc.DocTitle = $('#txtDocTitle').val();
@@ -755,13 +757,16 @@
             doc.Updated = Apps.Util.GetSqlDateTime(new Date());
 
             var url = Apps.Settings.WebRoot + '/api/Docs/UpsertDoc'; //?id=0&softwareId=' + Master.Util.QueryString["softwareId"] + '&title=[edit]&content=[edit]&parentId=0';
-            Apps.Util.PostWithData(url, JSON.stringify(doc), function (error, result) {
+            Apps.Post2(url, JSON.stringify(doc), function (result) {
 
-                Me.Event('back_to_parent');
+                if (result.Success) {
+                    Me.Event('back_to_parent');
 
-                Apps.RegisterPage({ name: 'DocsEdit', pageroot: Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules' }, function () {
-                    Apps.UI.DocsEdit.Hide();
-                });
+                    Apps.Components.Docs.DocsEdit.Hide();
+                }
+                else {
+                    Apps.Notify('warning', 'Failed updating doc.');
+                }
             });
         },
         Cancel: function () {
@@ -1013,29 +1018,31 @@
 
                 case 'back_to_parent':
 
-                    Apps.Util.Get('/api/Docs/GetAllDocTags', function (error, result) {
+                    if (Me.Doc) {
+                        Apps.Util.Get('/api/Docs/GetAllDocTags', function (error, result) {
 
-                        Me.DocTags = result.Data;
+                            Me.DocTags = result.Data;
 
-                        Me.BaseLevel--;
+                            Me.BaseLevel--;
 
-                        //Apps.Notify('success', 'base level: ' + Me.BaseLevel);
+                            //Apps.Notify('success', 'base level: ' + Me.BaseLevel);
 
-                        Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetDoc?docId=' + Me.Doc.ParentDocID, function (error, result) {
+                            Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetDoc?docId=' + Me.Doc.ParentDocID, function (error, result) {
 
-                            if (Me.Doc.ParentDocID === -1) {
-                                Me.RefreshParentDocs();
-                                $('#btnBackToParent').hide();
-                                $('#divDocs_ParentName').text('');
-                            }
-                            else {
-                                Me.Doc = result.Data[0];
-                                Me.RefreshChildDocs(Me.ParentDocID);
-                                $('#btnBackToParent').show();
-                                $('#spanBackToParentName').text(Me.Doc.ParentDocID);
-                            }
-                        });
-                    });
+                                if (Me.Doc.ParentDocID === -1) {
+                                    Me.RefreshParentDocs();
+                                    $('#btnBackToParent').hide();
+                                    $('#divDocs_ParentName').text('');
+                                }
+                                else {
+                                    Me.Doc = result.Data[0];
+                                    Me.RefreshChildDocs(Me.ParentDocID);
+                                    $('#btnBackToParent').show();
+                                    $('#spanBackToParentName').text(Me.Doc.ParentDocID);
+                                }
+                            });
+                        })
+                    }
                     break;
 
                 case 'show_archived_changed':
@@ -1107,7 +1114,7 @@
                 case 'doc_move':
 
                     let moveDoc = JSON.parse(unescape(args));
-                    Apps.Pages.DocMove.Show(moveDoc); 
+                    Apps.Components.Docs.DocMove.Show(moveDoc); 
 
                     break;
 
