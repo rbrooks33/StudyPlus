@@ -21,24 +21,11 @@
         Initialize: function (callback) {
             //Apps.Debug.Trace(this, 'Start.');
 
-            require([Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.min.js'], function (jqte) {
 
-                Apps.JQTE = $.fn.jqte; // Reference appears to get lost across modules. Use "$.fn.jqte = Apps.JQTE" to get it back.
-
-                Apps.LoadStyle(Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.css');
-
-                if (callback)
-                    callback();
-            });
-
-            Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.html', function () {
-
-                Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.css');
 
                 if (callback)
                     callback();
 
-            });
 
         },
         Show: function () {
@@ -54,44 +41,56 @@
             //    { name: 'Tags', pageroot: pagesRoot },
             //    { name: 'DocMove', pageroot: pagesRoot }
             //]);
+            require([Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.min.js'], function (jqte) {
 
-            Me.Initialize(function () {
+                Apps.JQTE = $.fn.jqte; // Reference appears to get lost across modules. Use "$.fn.jqte = Apps.JQTE" to get it back.
 
-                Apps.UI.Docs.Drop().Show();
+                Apps.LoadStyle(Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.css');
+                Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.html', function () {
 
-                Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetComputerName', function (error, result) {
+                    Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.css');
 
-                    let computerName = result.Message;
 
-                    Apps.Util.Get('/api/Docs/GetAllDocTags', function (error, result) {
+                    //});
+                    //Me.Initialize(function () {
 
-                        Me.DocTags = result.Data;
+                    Apps.UI.Docs.Drop().Show();
 
-                        Me.RefreshReviews(function () {
+                    Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetComputerName', function (error, result) {
 
-                            Apps.Components.Docs.Handlers.Initialize("Local Docs");
+                        let computerName = result.Message;
 
-                            Me.Event('show_level_changed');
+                        Apps.Util.Get('/api/Docs/GetAllDocTags', function (error, result) {
 
-                            //Me.RefreshParentDocs();
+                            Me.DocTags = result.Data;
 
-                            $('#spanDocsTitle').html('This computer\'s (' + computerName + ') documents');
-                            $('#spanDocsSubTitle').html('Doc Types are at ' + Apps.Settings.WebRoot + '/api/Docs/GetDocTypes').css('font-style', 'italic');
+                            Me.RefreshReviews(function () {
 
-                            $('#txtDocIDSearch').off().on('keyup', function () {
-                                Apps.Components.Docs.Event('search_docid');
+                                Apps.Components.Docs.Handlers.Initialize("Local Docs");
+
+                                Me.Event('show_level_changed');
+
+                                //Me.RefreshParentDocs();
+
+                                $('#spanDocsTitle').html('This computer\'s (' + computerName + ') documents');
+                                $('#spanDocsSubTitle').html('Doc Types are at ' + Apps.Settings.WebRoot + '/api/Docs/GetDocTypes').css('font-style', 'italic');
+
+                                $('#txtDocIDSearch').off().on('keyup', function () {
+                                    Apps.Components.Docs.Event('search_docid');
+                                });
+
+                                $('#txtDocContentSearch').off().on('keyup', function () {
+                                    Apps.Components.Docs.Event('search_doccontent');
+                                });
+
+
+
                             });
-
-                            $('#txtDocContentSearch').off().on('keyup', function () {
-                                Apps.Components.Docs.Event('search_doccontent');
-                            });
-
-
-
                         });
                     });
                 });
             });
+
         },
         Hide: function () {
             Apps.UI.Docs.Hide();

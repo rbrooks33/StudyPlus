@@ -894,7 +894,9 @@ Apps.Template = function (settings) {
             let templateNode = document.createElement('div');
             templateNode.id = this.TemplateID;
             templateNode.style.display = "none";
-            //document.body.appendChild(templateNode); //Put template on dom first
+
+            if (document.body)
+                document.body.appendChild(templateNode); //Put template on dom first
 
             //The selector is the main component div
             this.Selector = document.getElementById(this.TemplateID);
