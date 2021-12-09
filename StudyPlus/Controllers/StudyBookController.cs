@@ -55,7 +55,13 @@ namespace StudyPlus.Controllers
             {
                 using (var db = new LiteDatabase(studyBooksDB))
                 {
-                    result.Data = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList();
+                    var books = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList();
+                    //foreach (var book in books)
+                    //{
+                    //    book.Width = 3;
+                    //    book.Height = 4;
+                    //}
+                    result.Data = books;
                     result.Success = true;
                 }
             }
@@ -74,7 +80,14 @@ namespace StudyPlus.Controllers
             {
                 using (var db = new LiteDatabase(studyBooksDB))
                 {
-                    result.Data = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList().Where(b => b.ID == bookId);
+                    var book = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList().Where(b => b.ID == bookId);
+
+                    //book.First().Width = 3;
+                    //book.First().Height = 4;
+                    //book.First().Y = 40;
+                    //book.First().X = 60;
+
+                    result.Data = book;
                     result.Success = true;
                 }
             }
@@ -94,6 +107,8 @@ namespace StudyPlus.Controllers
                 using (var db = new LiteDatabase(studyBooksDB))
                 {
                     var books = db.GetCollection<StudyBook>("StudyBook"); //.FindAll().ToList().Where(b => b.ID == bookId);
+
+
                     books.Upsert(book);
                     result.Data = book;
                     result.Success = true;

@@ -2,15 +2,11 @@
     var Me = {
         SelectedBook: null,
         Initialize: function (callback) {
-            //Apps.LoadTemplate('StudyBook')
-            Apps.LoadTemplateAndStyle('StudyBook', function () {
 
-                Apps.UI.StudyBook.Drop();
-                Apps.UI.StudyBook.Show();
+            Me.UI.Show();
 
-                if (callback)
-                    callback();
-            });
+            if (callback)
+                callback();
         },
         New: function () {
             Apps.Get2('api/StudyBook/New', function (result) {
@@ -87,10 +83,10 @@
                         //Position header
                         let viewerDiv = $('#BookViewer_' + bookId);
 
-                        viewerDiv.css('top', book.Y + 'px');
-                        viewerDiv.css('left', book.X + 'px');
-                        viewerDiv.css('width', book.Width + 'px');
-                        viewerDiv.css('height', book.Height + 'px');
+                        viewerDiv[0].style.top = book.Y + 'vh'; //.css('top', book.Y + 'vh');
+                        viewerDiv[0].style.left = book.X + 'vw'; //.css('left', book.X + 'vw');
+                        viewerDiv[0].style.width = book.Width + 'vw'; //.css('width', book.Width + 'vw');
+                        viewerDiv[0].style.height = book.Height + 'vh'; //.css('height', book.Height + 'vh');
 
                         let headerDiv = $('#BookViewer_Header_' + bookId);
                         let thumbTack = $('#BookViewer_Thumbtack_' + bookId);
@@ -236,10 +232,10 @@
 
                     var bookDiv = $('#BookViewer_' + Me.SelectedBook.ID);
 
-                    let left = bookDiv.position().left;
-                    let top = bookDiv.position().top;
-                    let width = parseFloat(bookDiv.css('width').replace('px',''));
-                    let height = parseFloat(bookDiv.css('height').replace('px',''));
+                    let left = parseFloat(bookDiv[0].style.left.replace('vw', '')); //bookDiv.position().left;
+                    let top = parseFloat(bookDiv[0].style.top.replace('vh', '')); //bookDiv.position().top;
+                    let width = parseFloat(bookDiv[0].style.width.replace('vw',''));
+                    let height = parseFloat(bookDiv[0].style.height.replace('vh',''));
 
                     //right: 39, left: 37, top: 38, bottom: 40
                     //Apps.Notify('info', 'which: ' + event.which + '. code: ' + event.keyCode);
@@ -250,28 +246,28 @@
 
                             case 37: //width
 
-                                width = width - 5;
+                                width = width - 2;
+                                Me.UpdateSize(bookDiv, width, height);
                                 break;
 
                             case 38: //height
 
-                                height = height - 5;
+                                height = height - 2;
+                                Me.UpdateSize(bookDiv, width, height);
                                 break;
 
                             case 39: //width
 
-                                width = width + 5;
+                                width = width + 2;
+                                Me.UpdateSize(bookDiv, width, height);
                                 break;
 
                             case 40: //height
 
-                                height = height + 5;
+                                height = height + 2;
+                                Me.UpdateSize(bookDiv, width, height);
                                 break;
                         }
-                        bookDiv.css('width', width + 'px');
-                        bookDiv.css('height', height + 'px');
-                        Me.SelectedBook.Width = width;
-                        Me.SelectedBook.Height = height;
                     }
                     else {
                         //Position
@@ -279,32 +275,44 @@
 
                             case 37: //left
 
-                                left = left - 5;
+                                left = left - 2;
+                                Me.UpdatePosition(bookDiv, left, top);
                                 break;
 
                             case 38: //top
 
-                                top = top - 5;
+                                top = top - 2;
+                                Me.UpdatePosition(bookDiv, left, top);
                                 break;
 
                             case 39: //right
 
-                                left = left + 5;
+                                left = left + 2;
+                                Me.UpdatePosition(bookDiv, left, top);
                                 break;
 
                             case 40: //bottom
 
-                                top = top + 5;
+                                top = top + 2;
+                                Me.UpdatePosition(bookDiv, left, top);
                                 break;
                         }
-                        bookDiv.css('left', left + 'px');
-                        bookDiv.css('top', top + 'px');
-                        Me.SelectedBook.X = left;
-                        Me.SelectedBook.Y = top;
                     }
                 }
             });
 
+        },
+        UpdateSize: function (bookDiv, width, height) {
+            bookDiv.css('width', width + 'vw');
+            bookDiv.css('height', height + 'vh');
+            Me.SelectedBook.Width = width;
+            Me.SelectedBook.Height = height;
+        },
+        UpdatePosition: function (bookDiv, left, top) {
+            bookDiv.css('left', left + 'vw');
+            bookDiv.css('top', top + 'vh');
+            Me.SelectedBook.X = left;
+            Me.SelectedBook.Y = top;
         },
         Event: function (sender, args) {
             switch (sender) {

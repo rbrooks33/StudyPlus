@@ -1,12 +1,12 @@
 ﻿.StudyBook_BookViewer {
     position: absolute;
-    left: 10%;
-    top: 15%;
+    left: 10vw;
+    top: 15vh;
     border: 3px solid rgb(52, 152, 219);
     border-radius: 5px;
     padding: 10px;
-    width: 500px;
-    height: 500px;
+    width: 5vw;
+    height: 5vh;
     z-index: 200;
     background: white;
 }
@@ -15,5 +15,5 @@
 }
 .Index_StudyBookListContainer
 {
-    width:175px;
+
 }
