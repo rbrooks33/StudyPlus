@@ -15,13 +15,14 @@
         MouseOutCallback: null,
         ClickCallback: null,
         Initialize: function (callback) {
-            Apps.LoadTemplate('Dialogs', '/Scripts/Apps/Components/Dialogs/Dialogs.html', function () {
-                Apps.LoadStyle('/Scripts/Apps/Components/Dialogs/Dialogs.css');
-                Apps.UI.Dialogs.Drop();
-                if (callback)
-                    callback();
-            });
+            //Apps.LoadTemplate('Dialogs', '/Scripts/Apps/Components/Dialogs/Dialogs.html', function () {
+            //    Apps.LoadStyle('/Scripts/Apps/Components/Dialogs/Dialogs.css');
+            //    Apps.UI.Dialogs.Drop();
+            //    if (callback)
+            //        callback();
+            //});
 
+            Me.UI.Drop();
             //Dialog Setup
 
 

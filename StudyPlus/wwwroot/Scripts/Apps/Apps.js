@@ -477,8 +477,11 @@
 
             //    if (config.Initialize) {
 
-            //        console.log('running intitialize of ' + config.Name);
-            //        c.Initialize();
+                    var input = JSON.stringify(c); // 'const getMessage = () => "Hello World";';
+                    var output = Babel.transform(input, { presets: ['es2015'] }).code;
+                    //console.log(output);
+                    c = JSON.parse(output); //Put back on coll as js
+                }
 
             //        //if (config.Framework === 'react' && config.AutoTranspile) {
 
@@ -986,6 +989,19 @@
             Apps.Notify('info', 'No messages available for failed call.');
         }
     },
+    ShowMessages: function (result) {
+        if (result && result.Messages) {
+            //$.each(result.SucMessages, function (index, message) {
+            //    Apps.Notify('warning', message);
+            //});
+            $.each(result.FailMessages, function (index, failMessage) {
+                vNotify.error({ text: failMessage, title: 'Fail Message', sticky: true, showClose: true });
+            });
+        }
+        else {
+            Apps.Notify('info', 'No messages available for failed call.');
+        }
+    },
     Auth: function (url, token, by, callback) {
         $.ajax({
             type: "PUT",
@@ -1081,6 +1097,63 @@ Apps.Data = {
      1. A Path property holding the path used
      2. A Data  property holding the resulting data
      3. A Refresh() method to call and refresh data when needed
+    
+    Instructions
+    1. Create a new method for every data object, providing optional
+    parameters and optional callback.
+    
+    2. In the method call "Me.Set([hard-coded url], function(data))"
+    Note that "Set" handles errors and will not call back but
+    instead show notifications.
+    
+    3. Optionally clean up the data returned and optionally call back
+     */
+
+    //Apps.Data.Register('App', '/api/Apps/GetApp?appId={0}')
+    //Apps.Data.Load('App', function () {
+    //Apps.Data.App.Refresh();
+    //Apps.Data.App.Selected = selectedApp; //For collections
+
+    Selected: null,
+
+    Gets: [],
+    Posts: [],
+    RegisterGET: function (dataName, url, component) {
+
+        this.Gets.push({ DataName: dataName, URL: url, Args: null });
+
+        var parentObj = Apps;
+
+        if (component) {
+            parentObj = component;
+            if (parentObj.Data == null)
+                parentObj['Data'] = {};
+        }
+
+        parentObj.Data[dataName] = {
+            Success: false,
+            Path: url,
+            Data: null,
+            Refresh: function (args, callback) {
+
+                let newPath = this.Path.SearchAndReplace.apply(parentObj.Data[dataName].Path, args);
+
+                Apps.Get(newPath, function (error, result) {
+
+                    if (!error) {
+                        parentObj.Data[dataName].Success = !error && result.Success;
+                        parentObj.Data[dataName].Data = result.Data;
+                    }
+                    else
+                        parentObj.Data.HandleException(result);
+
+                    parentObj.Data[dataName].Result = result;
+
+                    if (callback)
+                        callback();
+                });
+            }
+        };
 
     Instructions
     1. Create a new method for every data object, providing optional
@@ -1467,129 +1540,6 @@ Apps.Template = function (settings) {
     return this;
 
 };
-
-Apps['AppDialogs'] = {
-    Dialogs: [],
-    OpenCallback: null,
-    CloseCallback: null,
-    SaveCallback: function (obj, id) {
-        if (obj)
-            obj(id);
-    },
-    CancelCallback: function (obj, id) {
-        if (obj)
-            obj(id);
-    },
-    MouseOverCallback: null,
-    MouseOutCallback: null,
-    ClickCallback: null,
-    Register: function (me, dialogName, settings) {
-
-        if (!me.Dialogs)
-            me['Dialogs'] = [];
-
-        let buttonHtml = '';
-        if (settings.buttons) {
-            $.each(settings.buttons, function (index, button) {
-                if (button) {
-                    buttonHtml += '<div class="btn btn-success" id="' + button.id + '" onclick="' + button.action + '">' + button.text + '</div>';
-                }
-            });
-        }
-
-        if (!settings.content)
-            settings.content = '';
-
-        var newDialog = new this.DialogModel(dialogName, settings.content, settings.title, 0, settings.cancelfunction, null, buttonHtml, '');
-
-        let baseContentPre = this.GetBaseTemplate();
-        let baseContent = baseContentPre.SearchAndReplace.apply(baseContentPre, [settings.content, settings.title, dialogName, settings.dialogtype, buttonHtml, settings.closeaction]);
-
-        $(document.body).append('<div id = "myDialog_' + dialogName + '_DialogContainer" style="display:none;"></div>');
-
-        newDialog.Selector = $("#myDialog_" + dialogName + '_DialogContainer');
-
-        newDialog.Selector.html(baseContent);
-
-        me.Dialogs[dialogName] = newDialog;
-        me.Dialogs.push(newDialog);
-    },
-    GetBaseTemplate: function () {
-
-        //0 = content
-        //1 = title
-        //2 = id
-        //3 = dialog type(e.g. 'full-width')
-        //4 = button html
-        //5 = close function
-
-        let str = '';
-        str += '            <div id="myDialog_{2}" class="dialog open">';
-        str += '                <div class="dialog-container {3} dialog-scrollable">';
-        str += '                    <div class="dialog-content">';
-        str += '                        <div class="dialog-header">';
-        str += '                            <table style="width:100%;">';
-        str += '                                <tr>';
-        str += '                                    <td style="width:15%;"><h5 class="dialog-title">{1}</h5></td>';
-        str += '                                    <td><div id="myDialog_{2}_Header_AdditionalContent" class="myDialog_{2}_Header_AdditionalContent_Style"></div></td>';
-        str += '                                </tr>';
-        str += '                            </table>';
-
-        str += '                            <button type="button" class="close-dialog" onclick="Apps.AppDialogs.Close(\'{2}\')">&times;</button>';
-        str += '                        </div>';
-        str += '                        <div class="dialog-body">';
-        str += '                            <div id="myDialog_{2}_Content">{0}</div>';
-        str += '                        </div>';
-        str += '                        <div class="dialog-footer">';
-        str += '                            <div id="myDialog_{2}_Footer_AdditionalContent"></div>';
-        str += '                            {4}';
-        str += '                        </div>';
-        str += '                    </div>';
-        str += '                </div>';
-        str += '            </div>';
-
-        return str;
-    },
-    Close: function (id) {
-        $('#myDialog_' + id + '_DialogContainer').fadeOut();
-    },
-    Result: function () {
-        return {
-            Success: false,
-            Message: '',
-            Dialog: null
-        };
-    },
-    DialogModel: function (newid, content, title, size, cancelclick, saveclick, buttonHtml, subtitle) {
-
-        var result = {
-            ElementID: newid,
-            Selector: null,
-            Width: '400px',
-            Height: '200px',
-            Title: title,
-            Size: size,
-            CancelClick: cancelclick,
-            SaveClick: saveclick,
-            ButtonHTML: buttonHtml,
-            SubTitle: subtitle,
-            Content: content,
-            X: null,
-            Y: null,
-            Open: function () {
-                $('#myDialog_' + newid + '_Content').html(this.Content);
-                $("#myDialog_" + newid + '_DialogContainer').fadeIn("slow");
-            },
-            Close: function () {
-                $("#myDialog_" + newid + '_DialogContainer').fadeOut("slow");
-            }
-
-        };
-        return result;
-    },
-
-};
-
 //This handles UI chunks. 
 //Scenario #1: Grabbing a *template* chunk of HTML to be placed when and where needed (w/args)
 //Scenario #2: Grabbing a *template* chunk of HTML to be iterated over and placed when and where needed (w/args)
