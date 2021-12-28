@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/Apps/Apps.js"></script>
+
+    <script>
+        Apps.ComponentsReady = function () {
+            //Apps.Notify('info', 'ready');
+            $('#Login_divHeaderTextContainer').hide();
+        }
+        function ShowSample() {
+            $('.backstyle').show();
+            $('.frontstyle').show();
+            $('.floater').show();
+            $('.backstyle2').hide();
+            $('.frontstyle2').hide();
+            $('.floater2').hide();
+        }
+
+        function ShowLive() {
+            $('.backstyle').hide();
+            $('.frontstyle').hide();
+            $('.floater').hide();
+            $('.backstyle2').show();
+            $('.frontstyle2').show();
+            $('.floater2').show();
+
+            let dstart = [171, 180, 190, 180, 190, 200, 210, 200];
+            let dleft = 30;
+
+            let d = 'M ' + dstart[0] + ',210 L 180,190 L 190,210 L 180,230 M 190,210 L 200,190 L 210,210 L 200,230';
+
+            $.each(dstart, function (index, start) {
+                start += dleft;
+            });
+
+           
+            $('.floater2')[0].style.clipPath = "path('" + d + "')";
+        }
+    </script>
+
+    <style>
+        .backstyle {
+            position: absolute;
+            background-image: url(./Images/headshot.jpg);
+            width: 400px;
+            height: 400px;
+            z-index: 2;
+            clip-path: circle(17px at 139px 265px);
+        }
+
+        .frontstyle {
+/*            clip-path: circle(17px at 139px 265px);
+*/            position: absolute;
+            background-image: url(./Images/mp.jpg);
+            width: 400px;
+            height: 400px;
+            z-index: 1;
+        }
+
+        .floater {
+/*            clip-path: path("M 170,210 L 180,190 L 190,210 L 180,230 M 190,210 L 200,190 L 210, 210 L 200,230"); 
+*/        }
+
+        .backstyle2 {
+            position: absolute;
+            background-image: url(./Images/headshot.jpg);
+            width: 400px;
+            height: 400px;
+            z-index: 2;
+        }
+
+        .frontstyle2 {
+            position: absolute;
+            background-image: url(./Images/mp.jpg);
+            width: 400px;
+            height: 400px;
+            z-index: 1;
+        }
+
+        .floater2 {
+            clip-path: path("M 170 210 L 180,190 L 190 210 L 180,230 M 190 210 L 200,190 L 210 210 L 200,230");
+        }
+
+        .controls{
+            position:absolute;
+            left:400px;
+/*            border:1px solid blue;
+*/            width: 400px;
+            height:400px;
+            margin:10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="backstyle floater" style="display:none;"></div>
+    <div class="frontstyle" style="display:none;"></div>
+
+    <div class="backstyle2 floater2"></div>
+    <div class="frontstyle2"></div>
+
+    <div class="controls">
+        <div class="btn-group">
+            <div class="btn btn-info" onclick="ShowSample();">Show Sample</div>
+            <div class="btn btn-info" onclick="ShowLive();">Show Live</div>
+        </div>
+    </div>
+    <!--<div class="image">
+        <div class="floater">
+            <div class="title">
+                My Title
+            </div>
+            <div class="description">
+                Short Description
+            </div>
+        </div>
+    </div>
+
+
+    <div id="back" class="backstyle">
+        <img src="Images/headshot.jpg" />
+    </div>
+
+    <div style="width:400px; height:400px;z-index:101;">
+        <div style="border: 1px solid green; position: absolute; width: 20px;
+        height: 20px; z-index: 101; left: 20px; top: 20px;"></div>
+    </div>
+
+    <div id="front" class="frontstyle">
+        <img src="Images/mp.jpg" />
+    </div>-->
+
+</body>
+</html>

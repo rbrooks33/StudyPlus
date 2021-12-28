@@ -3,14 +3,16 @@
         SelectedBook: null,
         Initialize: function (callback) {
             //Apps.LoadTemplate('StudyBook')
-            Apps.LoadTemplateAndStyle('StudyBook', function () {
+            //Apps.LoadTemplateAndStyle('StudyBook', function () {
 
-                Apps.UI.StudyBook.Drop();
-                Apps.UI.StudyBook.Show();
+            //    Apps.UI.StudyBook.Drop();
+            //    Apps.UI.StudyBook.Show();
 
+            //});
+
+            Me.UI.Templates.templateBook.Show();
                 if (callback)
                     callback();
-            });
         },
         New: function () {
             Apps.Get2('api/StudyBook/New', function (result) {
@@ -50,7 +52,7 @@
         Open: function (bookId, callback) {
 
             //Create dialog
-            Apps.Components.Dialogs.Register('EditBookDialog_' + bookId, {
+            Apps.AppDialogs.Register(Me, 'EditBookDialog_' + bookId, {
                 title: 'Edit',
                 size: 'default',
                 templateid: 'templateMyDialog1',
@@ -78,7 +80,7 @@
 
                         $('#BookViewer_' + book.ID).detach();
 
-                        let bookHtml = Apps.Util.GetHTML('templateBook', [book.ID, book.Title, book.SubTitle]);
+                        let bookHtml = Me.UI.Templates.templateBook.HTML([book.ID, book.Title, book.SubTitle]);
 
                         $(document.body).append(bookHtml);
 

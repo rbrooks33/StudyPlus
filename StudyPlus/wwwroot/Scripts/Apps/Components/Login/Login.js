@@ -2,9 +2,9 @@ define([], function () {
     var Me = {
         Initialize: function (callback) {
 
-            Apps.LoadTemplateAndStyle('Login', function () {
+            //Apps.LoadTemplateAndStyle('Login', function () {
 
-                Apps.UI.Login.Show();
+                //Me.Show();
 
                 Me.Resize();
                 $(window).resize(function () {
@@ -13,7 +13,7 @@ define([], function () {
 
                 if (callback)
                     callback();
-            });
+            //});
         },
         Show: function () {
 

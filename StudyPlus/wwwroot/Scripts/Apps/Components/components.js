@@ -31,17 +31,10 @@
     },
     {
       "Name": "Login",
-      "Version": null,
-      "Description": "Encompasses all UI and logic for authentication and authorization.",
-      "ComponentFolder": null,
-      "TemplateFolder": null,
       "Load": true,
       "Initialize": true,
-      "Color": "blue",
-      "ModuleType": "require",
-      "Framework": "default",
-      "Components": [],
-      "IsOnDisk": false
+      "UI": true,
+      "Components": []
     },
     {
       "Name": "Docs",
@@ -181,12 +174,12 @@
       "Name": "StudyBook",
       "Load": true,
       "Initialize": true,
-      "ModuleType": "require",
+      "UI": true,
       "Components": []
     },
     {
       "Name": "Dialogs",
-      "Load": true,
+      "Load": false,
       "Initialize": true,
       "ModuleType": "require",
       "Components": []
