@@ -46,15 +46,15 @@
                 Apps.JQTE = $.fn.jqte; // Reference appears to get lost across modules. Use "$.fn.jqte = Apps.JQTE" to get it back.
 
                 Apps.LoadStyle(Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.css');
-                Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.html', function () {
+                //Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.html', function () {
 
-                    Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.css');
+                //    Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.css');
 
 
                     //});
                     //Me.Initialize(function () {
 
-                    Apps.UI.Docs.Drop().Show();
+                    Me.UI.Show();
 
                     Apps.Util.Get(Apps.Settings.WebRoot + '/api/Docs/GetComputerName', function (error, result) {
 
@@ -88,7 +88,7 @@
                             });
                         });
                     });
-                });
+                
             });
 
         },

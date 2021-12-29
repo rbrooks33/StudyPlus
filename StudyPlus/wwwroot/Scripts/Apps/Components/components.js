@@ -38,15 +38,9 @@
     },
     {
       "Name": "Docs",
-      "Version": null,
-      "Description": "Encompasses all UI and logic for authentication and authorization.",
-      "ComponentFolder": null,
-      "TemplateFolder": null,
       "Load": true,
       "Initialize": false,
-      "Color": "blue",
-      "ModuleType": "require",
-      "Framework": "default",
+      "UI": true,
       "Components": [
         {
           "Name": "D3",
