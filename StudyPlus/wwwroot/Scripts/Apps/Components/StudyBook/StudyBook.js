@@ -246,25 +246,25 @@
 
                             case 37: //width
 
-                                width = width - 2;
+                                width = width - 2.5;
                                 Me.UpdateSize(bookDiv, width, height);
                                 break;
 
                             case 38: //height
 
-                                height = height - 2;
+                                height = height - 2.5;
                                 Me.UpdateSize(bookDiv, width, height);
                                 break;
 
                             case 39: //width
 
-                                width = width + 2;
+                                width = width + 2.5;
                                 Me.UpdateSize(bookDiv, width, height);
                                 break;
 
                             case 40: //height
 
-                                height = height + 2;
+                                height = height + 2.5;
                                 Me.UpdateSize(bookDiv, width, height);
                                 break;
                         }
@@ -275,25 +275,25 @@
 
                             case 37: //left
 
-                                left = left - 2;
+                                left = left - 2.5;
                                 Me.UpdatePosition(bookDiv, left, top);
                                 break;
 
                             case 38: //top
 
-                                top = top - 2;
+                                top = top - 2.5;
                                 Me.UpdatePosition(bookDiv, left, top);
                                 break;
 
                             case 39: //right
 
-                                left = left + 2;
+                                left = left + 2.5;
                                 Me.UpdatePosition(bookDiv, left, top);
                                 break;
 
                             case 40: //bottom
 
-                                top = top + 2;
+                                top = top + 2.5;
                                 Me.UpdatePosition(bookDiv, left, top);
                                 break;
                         }
@@ -307,12 +307,14 @@
             bookDiv.css('height', height + 'vh');
             Me.SelectedBook.Width = width;
             Me.SelectedBook.Height = height;
+            Me.SaveBook(Me.SelectedBook);
         },
         UpdatePosition: function (bookDiv, left, top) {
             bookDiv.css('left', left + 'vw');
             bookDiv.css('top', top + 'vh');
             Me.SelectedBook.X = left;
             Me.SelectedBook.Y = top;
+            Me.SaveBook(Me.SelectedBook);
         },
         Event: function (sender, args) {
             switch (sender) {
