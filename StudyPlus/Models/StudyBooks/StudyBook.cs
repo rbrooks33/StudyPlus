@@ -8,6 +8,10 @@ namespace StudyPlus.Models.StudyBooks
 {
     public class StudyBook
     {
+        public StudyBook()
+        {
+            Docs = new List<Doc>();
+        }
         [Key]
         public int ID { get; set; }
         public string Title { get; set; }
@@ -17,6 +21,6 @@ namespace StudyPlus.Models.StudyBooks
         public decimal Y { get; set; }
         public decimal Height { get; set; }
         public decimal Width { get; set; }
-        
+        public List<Doc> Docs { get; set; }
     }
 }

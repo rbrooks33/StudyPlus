@@ -68,14 +68,6 @@
             };
 
         },
-        Values: function (obj) {
-            //var obj = { foo: 'bar', baz: 42 };
-            var result = null;
-            var values = Object.keys(obj).map(function (e) {
-                result = obj[e]; //return obj[e]
-            });
-            return result;
-        },
         //Specify
         //1.) HTML file that contains template
         //2.) Template ID inside the file. ID will be then  be available in DOM.
@@ -167,7 +159,7 @@
                 if (content)
                     content = content.SearchAndReplace.apply(content, argsArray);
                 else
-                    console.warn('GetHTML content is empty although args exist. Template: ' + templateId);
+                    var dothis = "now";
             }
             return content; 
         },
@@ -418,18 +410,9 @@
         IsInt: function (value) {
             return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value));
         },
-        IsDate: function (d) {
-            return typeof d.getMonth === 'function';
-        },
+
         IsNumber: function (value) {
-            if (value === '')
-                return false;
-            else
-                return !isNaN(Number(value));
-        },
-        IsAlpha: function (ch) {
-            return typeof ch === "string" && ch.length === 1
-                && (ch >= "a" && ch <= "z" || ch >= "A" && ch <= "Z");
+            return !isNaN(Number(value));
         },
         IsNormalInteger: function (str) {
             var n = Math.floor(Number(str));
@@ -573,7 +556,29 @@
             else
                 return "";
         },
-        Ticks: ((new Date().getTime() * 10000) + 621355968000000000),
+        TimeElapsed(date) {
+
+            const since = date.getTime(); // 1491685200000; // Saturday, 08-Apr-17 21:00:00 UTC
+            const elapsed = (new Date().getTime() - since) / 1000;
+            var message = '';
+
+            if (elapsed >= 0) {
+                const diff = {};
+
+                diff.days = Math.floor(elapsed / 86400);
+                diff.hours = Math.floor(elapsed / 3600 % 24);
+                diff.minutes = Math.floor(elapsed / 60 % 60);
+                diff.seconds = Math.floor(elapsed % 60);
+
+                message = `${diff.days}d ${diff.hours}h ${diff.minutes}m ${diff.seconds}s ago.`;
+                message = message.replace(/(?:0. )+/, '');
+                
+            }
+            else {
+                Apps.Notify('info', 'Elapsed time lesser than 0, i.e. specified datetime is still in the future.');
+            }
+            return message;
+        },
         Middle: function (selector)
         {
             var result = { left: 0, top: 0 };

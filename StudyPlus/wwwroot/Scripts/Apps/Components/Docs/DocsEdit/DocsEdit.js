@@ -1,24 +1,21 @@
 define([], function () {
     var Me = {
-        Enabled: true,
-        Color: 'blue',
-        Name: 'DocsEdit',
         Doc: null,
         SelectedFile:null,
         Initialize: function (callback) {
 
             //Apps.Debug.Trace(this);
 
-            Apps.LoadTemplate('DocsEdit', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.html', function () {
+            //Apps.LoadTemplate('DocsEdit', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.html', function () {
 
-                Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.css');
+                //Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.css');
 
-                Apps.UI.DocsEdit.Drop();
-                Apps.UI.DocsEdit.Show();
+                Me.UI.Templates.DocsEdit.Drop();
+                Me.UI.Templates.DocsEdit.Show();
 
                 if (callback)
                     callback();
-            });
+            //});
 
         },
         Show: function(doc)
@@ -31,13 +28,17 @@ define([], function () {
                 //Apps.UI.DocsEdit.Show();
                 Apps.Util.CenterAbsolute($('#divDocsEditContent'));
 
-                $('#txtDocContent').jqte();
-                $('.jqte_editor').css('min-height', '300px');
+                var test = new Apps.Froala('#txtDocContent', {}, function () {
+                    //$('#txtDocContent').jqte();
+                    //$('.jqte_editor').css('min-height', '300px');
 
-                $('#spanDocsEdit_DocName').text('Edit Doc #' + doc.DocID);
-                $('#DocsEdit_DocDates').text('Created ' + Apps.Util.FormatDateTime2(doc.Created) + ' Last Updated ' + Apps.Util.FormatDateTime2(doc.Updated));
-                $('#txtDocTitle').val(doc.DocTitle);
-                $('.jqte_editor').html(doc.DocContent);
+                    $('#spanDocsEdit_DocName').text('Edit Doc #' + doc.DocID);
+                    $('#DocsEdit_DocDates').text('Created ' + Apps.Util.FormatDateTime2(doc.Created) + ' Last Updated ' + Apps.Util.FormatDateTime2(doc.Updated));
+                    $('#txtDocTitle').val(doc.DocTitle);
+                    //$('.jqte_editor').html(doc.DocContent);
+
+                    $('.fr-view').addClass('gridlistitem');
+                });
 
                 $('#btnSaveDoc').off().on('click', function (event) {
                     var buttonDoc = doc;

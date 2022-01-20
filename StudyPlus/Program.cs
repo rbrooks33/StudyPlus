@@ -25,7 +25,7 @@ namespace StudyPlus
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();
-                webBuilder.UseUrls("https://localhost:5011");
+                webBuilder.UseUrls("https://localhost:5012");
             });
     }
 }

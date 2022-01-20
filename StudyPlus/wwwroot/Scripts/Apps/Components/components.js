@@ -72,17 +72,10 @@
         },
         {
           "Name": "DocsEdit",
-          "Version": null,
-          "Description": "",
-          "ComponentFolder": null,
-          "TemplateFolder": null,
-          "Load": false,
+          "Load": true,
           "Initialize": true,
-          "Color": "blue",
-          "ModuleType": "require",
-          "Framework": "default",
-          "Components": [],
-          "IsOnDisk": false
+          "UI": true,
+          "Components": []
         },
         {
           "Name": "DocsViewer",
@@ -169,7 +162,12 @@
       "Load": true,
       "Initialize": true,
       "UI": true,
-      "Components": []
+        "Components": [{
+            "Name": "Docs",
+            "Load": true,
+            "Initialize": true,
+            "UI": true
+        }]
     },
     {
       "Name": "Dialogs",

@@ -41,11 +41,11 @@
             //    { name: 'Tags', pageroot: pagesRoot },
             //    { name: 'DocMove', pageroot: pagesRoot }
             //]);
-            require([Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.min.js'], function (jqte) {
+            //require([Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.min.js'], function (jqte) {
 
-                Apps.JQTE = $.fn.jqte; // Reference appears to get lost across modules. Use "$.fn.jqte = Apps.JQTE" to get it back.
+                //Apps.JQTE = $.fn.jqte; // Reference appears to get lost across modules. Use "$.fn.jqte = Apps.JQTE" to get it back.
 
-                Apps.LoadStyle(Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.css');
+                //Apps.LoadStyle(Apps.Settings.WebRoot + '/Scripts/Apps/Resources/jquery-te-1.4.0.css');
                 //Apps.LoadTemplate('Docs', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.html', function () {
 
                 //    Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Docs.css');
@@ -89,7 +89,7 @@
                         });
                     });
                 
-            });
+            //});
 
         },
         Hide: function () {
@@ -147,8 +147,8 @@
                     //    if(jQuery.fn.jqte)
                     //        $(".editor").jqte();
                     //});
-                    $.fn.jqte = Apps.JQTE;
-                    $(".editor").jqte();
+                    //$.fn.jqte = Apps.JQTE;
+                    //$(".editor").jqte();
 
                 }
             });
@@ -203,8 +203,8 @@
                 else
                     Me.Collapse();
 
-                $.fn.jqte = Apps.JQTE;
-                $(".editor").jqte();
+                //$.fn.jqte = Apps.JQTE;
+                //$(".editor").jqte();
 
             });
 
@@ -232,7 +232,7 @@
                 li += '<table style="-webkit-border-vertical-spacing: 0.5em;border-collapse:separate;width:100%;">';
                 li += '    <tr>';
                 li += '        <td class="Docs_DocTitleCell" onclick="Apps.Components.Docs.Event(\'show_child_docs\',' + doc.DocID + ');">';
-                li += '            <span class="Docs_DocTitleTagsSpan">#' + doc.DocID + ' | ' + (doc.DocContent ? doc.DocContent.length : '0') + ' bytes | ' + doc.ChildCount + ' Child Docs</span>';
+                li += '            <span class="Docs_DocTitleTagsSpan">#' + doc.DocID + ' | ' + (doc.DocContent ? doc.DocContent.length : '0') + ' bytes | ' + doc.ChildCount + ' Sub Docs</span>';
                 li += '            <br /><span class="Docs_DocTitleCellTitle">' + doc.DocTitle + '</span>';
                 //li += doc.DocTitle;
                 let docTagHtml = '';
@@ -621,8 +621,8 @@
                 //    if(jQuery.fn.jqte)
                 //        $(".editor").jqte();
                 //});
-                $.fn.jqte = Apps.JQTE;
-                $(".editor").jqte();
+                //$.fn.jqte = Apps.JQTE;
+                //$(".editor").jqte();
 
             });
 
@@ -752,7 +752,7 @@
 
             Me.Doc = doc;
             doc.DocTitle = $('#txtDocTitle').val();
-            doc.DocContent = $('.jqte_editor').html();
+            //doc.DocContent = $('.jqte_editor').html();
             doc.Updated = Apps.Util.GetSqlDateTime(new Date());
 
             var url = Apps.Settings.WebRoot + '/api/Docs/UpsertDoc'; //?id=0&softwareId=' + Master.Util.QueryString["softwareId"] + '&title=[edit]&content=[edit]&parentId=0';
@@ -807,15 +807,15 @@
 
                 case 'edit':
 
-                    require([Apps.Settings.WebRoot + '/Scripts/Apps/Components/Docs/Components/DocsEdit/DocsEdit.js'], function (docsEdit) {
+                    //require([Apps.Settings.WebRoot + '/Scripts/Apps/Components/Docs/Components/DocsEdit/DocsEdit.js'], function (docsEdit) {
                     //args is doctype obj
                     //Apps.RegisterPage({ name: 'DocsEdit', pageroot: Apps.Settings.AppsRoot + '/AutoComponents/Docs/Modules' }, function () {
 
-                        Apps.Components.Docs['DocsEdit'] = docsEdit;
-                        docsEdit.Show(args);
+                        //Apps.Components.Docs['DocsEdit'] = docsEdit;
+                        Me.DocsEdit.Show(args);
                         //Apps.Pages.DocsEdit.Show(args);
 
-                    });
+                    //});
 
 
                     break;

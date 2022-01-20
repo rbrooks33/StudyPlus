@@ -71,7 +71,27 @@
       "ModuleType": "style",
       "FileName": "vanilla-notify.css",
       "Description": "Enabled app to show popup notifications."
-    },
+      },
+      {
+          "Name": "Froala",
+          "Enabled": true,
+          "LoadFirst": false,
+          "Order": 1,
+          "ModuleType": "require",
+          "ModuleName": "Froala",
+          "FileName": "froala.js",
+          "Description": "Editor."
+      },
+      {
+          "Name": "Froala CSS",
+          "Enabled": true,
+          "LoadFirst": false,
+          "Order": 1,
+          "ModuleType": "style",
+          "FileName": "froala.css",
+          "Description": "Editor."
+      },
+
     {
       "Name": "Util",
       "Enabled": true,

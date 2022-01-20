@@ -408,14 +408,15 @@ define(['./util.js'], function (Util) {
 
                 var targetclass = $(event.target).attr("class");
 
-                if (targetclass !== "grid_view_span"
+                if (targetclass !== "grid_view_span gridlistitem"
                     && targetclass !== "grid_edit_span"
                     && !$(event.target).hasClass("editcontrol")
                     && !$(event.target).hasClass("isdate")
                     && !$(event.target).hasClass("jqte_tool_icon")
                     && !$(event.target.offsetParent).hasClass("editCellStyle")
                     && !$(event.target.parentElement).hasClass("grid_view_span")
-                    && !$(event.target).hasClass("jqte_editor")) {
+                    && !$(event.target).hasClass("jqte_editor")
+                    && targetclass !== undefined) {
 
                     $(".grid_view_span").show();
                     $(".grid_edit_span").hide();
@@ -455,6 +456,12 @@ define(['./util.js'], function (Util) {
                         eval('objRowData.' + field.name + ' = "' + escape($(editorElement[0]).parent().prev().html()) + '"');
                     }
 
+                }
+                else if (field.type === 'codeeditor') {
+                    var editorElement = $('#' + settings.prefix + '_' + field.name + '_GridsEdit' + uniqueId);
+                    if (editorElement.length === 1) {
+                        eval('objRowData.' + field.name + ' = "' + escape($(editorElement[0]).parent().prev().html()) + '"');
+                    }
                 }
 
             });
@@ -529,6 +536,9 @@ define(['./util.js'], function (Util) {
                     else if (field.type === 'editor') {
                         table += '<td style="padding:3px;"><input class="' + prefix + '_' + field.name + '_Editor" id="' + prefix + '_' + field.name + '_GridsEdit' + uniqueId + '" type="text" value="" /></td>';
                     }
+                    else if (field.type === 'codeeditor') {
+                        table += '<td style="padding:3px;"><input class="' + prefix + '_' + field.name + '_CodeEditor" id="' + prefix + '_' + field.name + '_GridsEdit' + uniqueId + '" type="text" value="" /></td>';
+                    }
                 }
                 else {
                     table += '<td>';
@@ -542,6 +552,9 @@ define(['./util.js'], function (Util) {
                     }
                     else if (field.type === 'editor') {
                         table += '<span style="padding:3px;"><input class="' + prefix + '_' + field.name + '_Editor" id="' + prefix + '_' + field.name + '_GridsEdit' + uniqueId + '" type="text" value="" /></span>';
+                    }
+                    else if (field.type === 'codeeditor') {
+                        table += '<span style="padding:3px;"><input class="' + prefix + '_' + field.name + '_CodeEditor" id="' + prefix + '_' + field.name + '_GridsEdit' + uniqueId + '" type="text" value="" /></span>';
                     }
                     table += '</td>';
                 }
@@ -586,6 +599,28 @@ define(['./util.js'], function (Util) {
                     var editorClassName = prefix + '_' + field.name + '_Editor';
                     $(div).find("." + editorClassName).jqte();
                     $(div).find("." + editorClassName).jqteVal(fieldValue);
+                }
+                else if (field.type === 'codeeditor') {
+
+                    if (ace) {
+                        var fieldValue = unescape(eval('objRowData.' + field.name));
+                        var editorClassName = prefix + '_' + field.name + '_CodeEditor';
+                        var aceEdit = ace.edit($(div).find("." + editorClassName));
+                        aceEdit.setTheme("ace/theme/monokai");
+                        aceEdit.setMode("ace/mode/csharp");
+                        aceEdit.renderer.onResize(true);
+                        aceEdit.setValue(fieldValue ? fieldValue : '');
+                    }
+                    else {
+                        Apps.Notify('info', 'Tried to show text with Ace code editor but Ace is not there.');
+                    }
+
+                    //Me.EditorPre = ace.edit("Apps_Publish_PreBuildScript_Editor");
+                    //Me.EditorPre.setTheme("ace/theme/monokai");
+                    //Me.EditorPre.session.setMode("ace/mode/csharp");
+                    //Me.EditorPre.renderer.onResize(true);
+                    //Me.EditorPre.setValue(Me.CurrentPublishProfile.PreBuildScript ? Me.CurrentPublishProfile.PreBuildScript : '');
+
                 }
             });
             $(div[0]).show();
@@ -705,9 +740,56 @@ define(['./util.js'], function (Util) {
                 Me.ShowHideCell(td[0], false);
 
                 var editcontrol = $(td).find(".editcontrol"); //Should only be one
+
+
+                //if (editcontrol.hasClass('codeeditor')) {
+                //    var aceEdit = ace.edit(editcontrol[0].id);
+                //    aceEdit.setTheme("ace/theme/monokai");
+                //    aceEdit.session.setMode("ace/mode/csharp");
+                //    aceEdit.renderer.onResize(true);
+
+                //    $(td).find('.ace_editor').css('height', '20px');
+                //    //aceEdit.setValue(fieldValue ? fieldValue : '');
+                //}
+
                 $(editcontrol).select();
                 var rowdata = unescape(td.parent().attr("rowdata"));
                 var rowdataobj = JSON.parse(rowdata);
+
+                if (editcontrol.hasClass('editor')) {
+
+                    //var editor = new Apps.Froala.FroalaEditor(editcontrol);
+                    var test = new Apps.Froala('.editcontrol.editor', {}, function () {
+
+                        $('.fr-view').addClass('gridlistitem');
+
+                    //    if (test.length == undefined) {
+                    //        $(test.el).find('li').css('display', 'list-item').css('list-style', 'initial');
+                    //    }
+                    //    else if (test.length > 1) {
+                    //        $.each(test, function (index, testElement) {
+                    //            $(testElement.el).find('li').css('display', 'list-item').css('list-style', 'initial');
+                    //        });
+                    //    }
+                    });
+
+                    //, {
+                    //    listAdvancedTypes: true,
+                    //    toolbarButtons: ['formatOL', 'formatUL']
+                    //}); //#gridStories_ViewFormat_Row0_ColStoryDescription');
+
+                    //if(editcontrol.prevObject.find('.jqte_hiddenField').length == 0)
+                    //    editcontrol.jqte();
+
+                    //var fieldValue = unescape(eval('objRowData.' + field.name));
+                    //var editorClassName = prefix + '_' + field.name + '_Editor';
+                    //$(div).find("." + editorClassName).jqte();
+                    //$(div).find("." + editorClassName).jqteVal(fieldValue);
+
+                    
+                    
+
+                }
             }
 
             if (callback) {
@@ -753,17 +835,19 @@ define(['./util.js'], function (Util) {
         },
         RowActionCallback: function (callback, td) {
 
-            var rowdata = unescape($($(td).parent().parent().parent().parent()[0]).attr("rowdata"));
+            var row = $($(td).parent().parent().parent().parent().parent()[0]);
+            var rowdata = unescape(row.attr("rowdata"));
 
             if (callback)
-                callback(td, rowdata);
+                callback(td, JSON.parse(rowdata), row);
         },
         RowButtonCallback: function (callback, td) {
 
-            var rowdata = unescape($($(td).parent().parent().parent()[0]).attr("rowdata")); //button is not inside divs/li/ul etc.
+            var row = $($(td).parent().parent().parent()[0]);
+            var rowdata = unescape(row.attr("rowdata")); //button is not inside divs/li/ul etc.
 
             if (callback)
-                callback(td, rowdata);
+                callback(td, JSON.parse(rowdata), row);
         },
         RowMouseOverCallback: function (callback, td, rowdata) {
 
@@ -841,6 +925,13 @@ define(['./util.js'], function (Util) {
             settings.returntableonly = true;
             Me.RefreshHTML(settings);
             settings.table.attr("id", settings.id); //Give it the name that would normally go to the grid parent div
+            //settings.table.find('li').css('display', 'list-item');
+            //settings.table.find('ol').css('list-style', 'unset');
+            //settings.table.find('ul').css('list-style', 'unset');
+            //settings.table.find('li').css('display','list-item').css('list-style','initial');
+
+            settings.table.find('.grid_view_span').addClass('gridlistitem');
+
             return settings.table[0];
         },
         RefreshHTML: function (settings) {
@@ -879,54 +970,73 @@ define(['./util.js'], function (Util) {
                     rows += '<td valign="top" colspan="' + columns.length + '" style="border-top:0px;"><h2>' + title;
                     if (settings.add)
                         rows += '&nbsp;<input id="add' + settings.id + '" onclick="Apps.Grids.AddCallback(' + settings.add.addclick.toString() + ')" value="' + settings.add.text + '" type="button" class="btn btn-sm btn-primary" />';
+                }
 
-                    if (settings.tableactions) {
+                if (settings.tableactions) {
 
+                    //bs 5 example:
+                    //rows += '<div class="dropdown">';
+                    //rows += '    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">';
+                    //rows += '        Dropdown link';
+                    //rows += '    </a>';
+
+                    //rows += '    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">';
+                    //rows += '        <li><a class="dropdown-item" href="#">Action</a></li>';
+                    //rows += '        <li><a class="dropdown-item" href="#">Another action</a></li>';
+                    //rows += '<li><a class="dropdown-item" href="#">Something else here</a></li>';
+                    //rows += '</ul>';
+                    //rows += '</div>';
+
+                    rows += '<div class="dropdown">';
+                    rows += '    <a class="btn btn-warning btn-sm dropdown-toggle" data-bs-toggle="dropdown">';
+                    rows += '        Actions';
+                    rows += '    </a>';
+                    rows += '    <ul class="dropdown-menu">';
+                    //rows += '        <div class="btn-group"> ';
+                    //rows += '           <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> ';
+                    //rows += '               Actions <span class="caret"></span> ';
+                    //rows += '           </button> ';
+                    //rows += '           <ul class="dropdown-menu"> ';
+                    //rows += '               <li><a href="#" onclick="Apps.Grids.TableActionCallback()">All</a></li> ';
+                    //rows += '               <li role="separator" class="divider"></li> ';
+
+                    $.each(settings.tableactions, function (index, action) {
+
+                        rows += '  <li>  <a class="dropdown-item" href="#" onclick="Apps.Grids.TableActionCallback(' + action.actionclick.toString() + ');">' + action.text + '</a></li>';
+                        //rows += '           <li><a href="#" onclick="Apps.Grids.TableActionCallback(' + action.actionclick.toString() + ')">' + action.text + '</a></li> ';
+
+                    });
+
+                    rows += '           </ul> ';
+                    rows += '       </div> ';
+                }
+
+                if (settings.filters) {
+
+                    $.each(settings.filters, function (index, filter) {
+
+                        // rows += '<td>';
                         rows += '        <div class="btn-group"> ';
                         rows += '           <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> ';
-                        rows += '               Actions <span class="caret"></span> ';
+                        rows += '               ' + filter.text + '<span class="caret"></span> ';
                         rows += '           </button> ';
                         rows += '           <ul class="dropdown-menu"> ';
-                        //rows += '               <li><a href="#" onclick="Apps.Grids.TableActionCallback()">All</a></li> ';
-                        //rows += '               <li role="separator" class="divider"></li> ';
+                        rows += '               <li><a href="#" onclick="Apps.Grids.FilterCallback(' + filter.selectclick.toString() + ',\'0\',\'' + filter.textfield + '\')">All</a></li> ';
+                        rows += '               <li role="separator" class="divider"></li> ';
+                        $.each(filter.data, function (index, fd) {
 
-                        $.each(settings.tableactions, function (index, action) {
-
-                            rows += '           <li><a href="#" onclick="Apps.Grids.TableActionCallback(' + action.actionclick.toString() + ')">' + action.text + '</a></li> ';
+                            rows += '           <li><a href="#" onclick="Apps.Grids.FilterCallback(' + filter.selectclick.toString() + ',\'' + eval('fd.' + filter.valuefield) + '\',\'' + filter.valuefield + '\')">' + eval('fd.' + filter.textfield) + '</a></li> ';
 
                         });
-
                         rows += '           </ul> ';
                         rows += '       </div> ';
-                    }
-
-                    if (settings.filters) {
-
-                        $.each(settings.filters, function (index, filter) {
-
-                            // rows += '<td>';
-                            rows += '        <div class="btn-group"> ';
-                            rows += '           <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> ';
-                            rows += '               ' + filter.text + '<span class="caret"></span> ';
-                            rows += '           </button> ';
-                            rows += '           <ul class="dropdown-menu"> ';
-                            rows += '               <li><a href="#" onclick="Apps.Grids.FilterCallback(' + filter.selectclick.toString() + ',\'0\',\'' + filter.textfield + '\')">All</a></li> ';
-                            rows += '               <li role="separator" class="divider"></li> ';
-                            $.each(filter.data, function (index, fd) {
-
-                                rows += '           <li><a href="#" onclick="Apps.Grids.FilterCallback(' + filter.selectclick.toString() + ',\'' + eval('fd.' + filter.valuefield) + '\',\'' + filter.valuefield + '\')">' + eval('fd.' + filter.textfield) + '</a></li> ';
-
-                            });
-                            rows += '           </ul> ';
-                            rows += '       </div> ';
-                            //                        rows += '</td>';
-                        });
-                    }
-
-                    rows += '</h2>';
-                    rows += '</td>';
-                    rows += '</tr>';
+                        //                        rows += '</td>';
+                    });
                 }
+
+                rows += '</h2>';
+                rows += '</td>';
+                rows += '</tr>';
 
                 //HEADER BEGIN
                 rows += '<tr>';
@@ -956,7 +1066,7 @@ define(['./util.js'], function (Util) {
 
                     $.each(settings.rowbuttons, function (index, button) {
 
-                        rowbuttons += '<input type="button" class="btn btn-xs btn-warning" value="' + button.text + '" onclick="Apps.Grids.RowButtonCallback(' + button.buttonclick.toString() + ',this);" /> ';
+                        rowbuttons += '<input id="' + settings.id + '_Row' + index + '_RowButton' + '" type="button" class="btn btn-sm btn-warning" style="margin-top:3px;" value="' + button.text + '" onclick="Apps.Grids.RowButtonCallback(' + button.buttonclick.toString() + ',this);" /> ';
                     });
 
                     rowbuttons += '</div> ';
@@ -986,7 +1096,7 @@ define(['./util.js'], function (Util) {
                 rows += '</tr>';
 
                 //ROWS
-                $.each(data, function (index, d) {
+                $.each(data, function (rowindex, d) {
 
                     Me.RowData = d; //To keep in scope
 
@@ -1002,7 +1112,7 @@ define(['./util.js'], function (Util) {
                     if (settings.rowclick)
                         rowclick = 'onclick="Apps.Grids.RowClickCallback(' + settings.rowclick.toString() + ', this, \'' + escape(JSON.stringify(Me.RowData)) + '\');"';
 
-                    rows += '<tr rowdata="' + escape(JSON.stringify(d)) + '" ' + rowmouseover + ' ' + rowmouseout + ' ' + rowclick + '>';
+                    rows += '<tr rowindex="' + rowindex + '" rowdata="' + escape(JSON.stringify(d)) + '" ' + rowmouseover + ' ' + rowmouseout + ' ' + rowclick + '>';
 
                     //ACTIONS
                     if (settings.rowactions) {
@@ -1010,10 +1120,10 @@ define(['./util.js'], function (Util) {
                         rows += '<td valign="top">';
 
                         rows += '<div class="dropdown">';
-                        rows += '    <button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown">';
+                        rows += '    <a class="btn btn-warning btn-sm dropdown-toggle" data-bs-toggle="dropdown">';
                         rows += '        Actions';
-                        rows += '    </button>';
-                        rows += '    <div class="dropdown-menu">';
+                        rows += '    </a>';
+                        rows += '    <ul class="dropdown-menu">';
                         //rows += '        <a class="dropdown-item" href="#">Link 1</a>';
                         //rows += '        <a class="dropdown-item" href="#">Link 2</a>';
                         //rows += '        <a class="dropdown-item" href="#">Link 3</a>';
@@ -1029,21 +1139,37 @@ define(['./util.js'], function (Util) {
                         $.each(settings.rowactions, function (index, action) {
 
                             //rows += '    <li><a href="#" onclick="Apps.Grids.RowActionCallback(' + action.actionclick.toString() + ',this);">' + action.text + '</a></li> ';
-                            rows += '    <a class="dropdown-item" href="#" onclick="Apps.Grids.RowActionCallback(' + action.actionclick.toString() + ',this);">' + action.text + '</a>';
+                            rows += '    <li><a class="dropdown-item" href="#" onclick="Apps.Grids.RowActionCallback(' + action.actionclick.toString() + ',this);return false;">' + action.text + '</a></li>';
 
                         });
 
                         //rows += '  </ul> ';
                         //rows += '</div> ';
-                        rows += '    </div>';
+                        rows += '    </ul>';
                         rows += '</div>';
 
                         rows += '</td>';
                     }
 
+                    ////BUTTONS
+                    //if (rowbuttons && rowbuttonorientation === "left")
+                    //    rows += rowbuttons;
+
                     //BUTTONS
-                    if (rowbuttons && rowbuttonorientation === "left")
-                        rows += rowbuttons;
+                    if (rowbuttons && rowbuttonorientation === "left") {
+                        if (settings.rowbuttons) {
+
+                            rows += '<td valign="top">';
+                            rows += '<div class="btn-group"> ';
+
+                            $.each(settings.rowbuttons, function (rowbuttonindex, button) {
+                                rows += '<input id="' + settings.id + '_Row' + rowindex + '_RowButton' + rowbuttonindex + '" type="button" class="btn btn-sm btn-warning" style="margin-top:3px;" value="' + button.text + '" onclick="Apps.Grids.RowButtonCallback(' + button.buttonclick.toString() + ',this);" /> ';
+                            });
+
+                            rows += '</div> ';
+                            rows += '</td>';
+                        }
+                    }
 
                     //CELLS
                     $.each(fields, function (index, field) {
@@ -1094,11 +1220,11 @@ define(['./util.js'], function (Util) {
                                 //VIEW (FORMAT)
                                 if (col.format) {
 
-                                    viewSpan = '<span class="grid_view_span" title="' + tooltip(Me.RowData) + '" ' + editclick + '>' + col.format(Me.RowData) + '</span>';
+                                    viewSpan = '<span id="' + settings.id + '_ViewFormat_Row' + rowindex + '_Col' + col.fieldname + '" class="grid_view_span" title="' + tooltip(Me.RowData) + '" ' + editclick + '>' + col.format(Me.RowData) + '</span>';
                                 }
 
                                 //EDIT
-                                var editSpan = '<span class="grid_edit_span" style="display:none;">';
+                                var editSpan = '<span class="grid_edit_span" style="display:none;list-style:initial;">';
 
                                 var edittype = "text"; //default to text
 
@@ -1121,6 +1247,12 @@ define(['./util.js'], function (Util) {
 
 
                                         editSpan += '<textarea class="editcontrol editor">' + fieldValue + '</textarea>&nbsp;';
+
+                                        break;
+                                    case "codeeditor":
+
+
+                                        editSpan += '<textarea class="editcontrol codeeditor" id="Apps_Grid_' + field.name + '_Row' + index + '">' + fieldValue + '</textarea>&nbsp;';
 
                                         break;
                                     case "select":
@@ -1156,7 +1288,7 @@ define(['./util.js'], function (Util) {
                                 editSpan += '   />';
                                 editSpan += '</span></span>';
 
-                                rows += '<td valign="top" class="' + settings.id + 'Cell editCellStyle" index="' + index + '">';
+                                rows += '<td valign="top" class="' + settings.id + 'Cell editCellStyle" data-fieldname="' + field.name + '" index="' + index + '">';
                                 rows += viewSpan;
                                 rows += editSpan;
                                 rows += '</td>';

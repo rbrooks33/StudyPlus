@@ -81,7 +81,7 @@ namespace StudyPlus.Controllers
                 using (var db = new LiteDatabase(studyBooksDB))
                 {
                     var book = db.GetCollection<StudyBook>("StudyBook").FindAll().ToList().Where(b => b.ID == bookId);
-
+                    //var docs = db.GetCollection<Doc>("Docs").FindAll().Where(d => d.)
                     //book.First().Width = 3;
                     //book.First().Height = 4;
                     //book.First().Y = 40;
