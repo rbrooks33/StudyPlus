@@ -23,7 +23,29 @@ namespace StudyPlus.Controllers
         {
             _env = env;
         }
+        [Route("Event")]
+        public Result Event(string source, )
+        {
+            var result = new Result();
+            var newBook = new StudyBook();
+            try
+            {
+                using (var db = new LiteDatabase(studyBooksDB))
+                {
+                    var table = db.GetCollection<StudyBook>("StudyBook");
+                    table.Upsert(newBook);
 
+                    result.Data = newBook;
+                    result.Success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Data = ex;
+            }
+
+            return result;
+        }
         [Route("New")]
         public Result New()
         {
