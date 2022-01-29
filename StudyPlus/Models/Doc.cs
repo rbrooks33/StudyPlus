@@ -19,8 +19,8 @@ namespace StudyPlus.Models
         public int DocTypeID { get; set; }
         public int UniqueID { get; set; } //ID unique within the doc type
         public int ProjectID { get; set; }
-        [Required]
-        [StringLength(50)]
+        //[Required]
+        //[StringLength(50)]
         public string DocTitle { get; set; }
         public string DocContent { get; set; }
         public int? ParentDocID { get; set; }

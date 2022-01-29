@@ -10,8 +10,8 @@ define([], function () {
 
                 //Apps.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Docs/Components/DocsEdit/DocsEdit.css');
 
-                Me.UI.Templates.DocsEdit.Drop();
-                Me.UI.Templates.DocsEdit.Show();
+                //Me.UI.Templates.DocsEdit.Drop();
+                //Me.UI.Templates.DocsEdit.Show();
 
                 if (callback)
                     callback();
@@ -20,12 +20,12 @@ define([], function () {
         },
         Show: function(doc)
         {
-            Me.Initialize(function () {
+           // Me.Initialize(function () {
                 doc = JSON.parse(unescape(doc));
                 Me.Doc = doc;
 
                 //Apps.Debug.Trace(this);
-                //Apps.UI.DocsEdit.Show();
+                Me.UI.Templates.DocsEdit.Show();
                 Apps.Util.CenterAbsolute($('#divDocsEditContent'));
 
                 var test = new Apps.Froala('#txtDocContent', {}, function () {
@@ -75,7 +75,7 @@ define([], function () {
 
                 Me.Event('cancel_new_file');
                 Me.Event('refresh_files');
-            });
+            //});
         },
         Hide: function()
         {

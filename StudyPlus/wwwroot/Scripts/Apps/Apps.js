@@ -7,7 +7,7 @@
     },
     PreInit: function () {
 
-        
+
         Apps.SetPolyfills();
 
         Apps['ActiveDeployment'] = {
@@ -41,7 +41,7 @@
         if (Apps.ActiveDeployment.Test) {
             //if (Apps.Components.Testing)
             //    Apps.Components.Testing.Test(arguments);
-           
+
         }
     },
     LoadUtil: function (callback) {
@@ -466,7 +466,7 @@
             //Added "UI" config (rb 3/12/2021)
             if (config.UI && config.UI === true) {
                 Apps.LoadUI(config.Name, c, function () {
-                    if(config.Initialize)
+                    if (config.Initialize)
                         c.Initialize();
                 });
             }
@@ -475,22 +475,22 @@
                     c.Initialize();
             }
 
-        //    if (config.Initialize) {
+            //    if (config.Initialize) {
 
-        //        console.log('running intitialize of ' + config.Name);
-        //        c.Initialize();
+            //        console.log('running intitialize of ' + config.Name);
+            //        c.Initialize();
 
-        //        //if (config.Framework === 'react' && config.AutoTranspile) {
+            //        //if (config.Framework === 'react' && config.AutoTranspile) {
 
-        //        //    var input = JSON.stringify(c); // 'const getMessage = () => "Hello World";';
-        //        //    var output = Babel.transform(input, { presets: ['es2015'] }).code;
-        //        //    //console.log(output);
-        //        //    c = JSON.parse(output); //Put back on coll as js
-        //        //}
+            //        //    var input = JSON.stringify(c); // 'const getMessage = () => "Hello World";';
+            //        //    var output = Babel.transform(input, { presets: ['es2015'] }).code;
+            //        //    //console.log(output);
+            //        //    c = JSON.parse(output); //Put back on coll as js
+            //        //}
 
-        //        //We might not initialize by default any more??
-        //        //Apps.AutoComponents[componentName].Initialize();
-        //    }
+            //        //We might not initialize by default any more??
+            //        //Apps.AutoComponents[componentName].Initialize();
+            //    }
         }
         else
             if (Apps.Settings.Debug)
@@ -1187,12 +1187,12 @@ Apps.Data = {
     RegisterPOST: function (dataName, url, args) {
         this.Posts.push({ DataName: dataName, URL: url, Args: args });
     },
-    RegisterMyPOST: function (me, postName, postUrl) {
+    RegisterMyPOST: function (me, postName, postUrl, args, sync) {
 
         if (!me.Data)
             me['Data'] = {};
 
-        if (!me.Data.Posts) 
+        if (!me.Data.Posts)
             me.Data.Posts = [];
 
         me.Data.Posts[postName] = {
@@ -1202,24 +1202,22 @@ Apps.Data = {
             Refresh: function (obj, args, callback) {
 
                 var refreshPostName = postName;
+                var refreshSync = sync;
 
                 let newPath = this.Path.SearchAndReplace.apply(me.Data.Posts[refreshPostName].Path, args);
 
-                Apps.Post(newPath, JSON.stringify(obj), function (error, result) {
+                let refreshPost = sync ? Apps.Post : Apps.PostSync;
+
+                refreshPost(newPath, JSON.stringify(obj), function (result) {
 
                     var postPostName = postName;
 
-                    if (!error) {
-                        me.Data.Posts[postPostName].Success = !error && result.Success;
-                        me.Data.Posts[postPostName].Data = result.Data;
-                    }
-                    else
-                        Apps.Data.HandleException(result);
-
+                    me.Data.Posts[postPostName].Success = result.Success;
+                    me.Data.Posts[postPostName].Data = result.Data;
                     me.Data.Posts[postPostName].Result = result;
 
                     if (callback)
-                        callback();
+                        callback(result);
                 });
             }
         };
@@ -1259,7 +1257,7 @@ Apps.Data = {
         }
         else
             Apps.Notify('warning', 'Data source name not found or more than one found: ' + dataName);
- 
+
     },
     HandleException: function (result) {
         if (result) {
@@ -1610,7 +1608,7 @@ Me.UI.Templates.MyChunk1.Drop([arg1]);
  */
 Apps.ComponentTemplate = function (settings) {
     this.Content = settings.content;
-    this.ID = settings.id; 
+    this.ID = settings.id;
     this.Selector = null;
     this.Drop = function (argsArray) {
 
@@ -1645,7 +1643,7 @@ Apps.ComponentTemplate = function (settings) {
     this.Hide = function (speed) {
 
         if (this.Selector)
-            this.Selector.hide(speed); 
+            this.Selector.hide(speed);
 
         return this;
     };
@@ -1659,13 +1657,13 @@ Apps.ComponentTemplate = function (settings) {
     this.HTML = function (argsArray) {
 
         var currentHtml = this.Content;
-       // if (this.Selector) {
+        // if (this.Selector) {
 
-            if (argsArray) {
-                currentHtml = currentHtml.SearchAndReplace.apply(currentHtml, argsArray);
-                //this.Content = Selector.html(newHtml);
-            }
-            //currentHtml = this.Selector.html();
+        if (argsArray) {
+            currentHtml = currentHtml.SearchAndReplace.apply(currentHtml, argsArray);
+            //this.Content = Selector.html(newHtml);
+        }
+        //currentHtml = this.Selector.html();
         //}
         return currentHtml;
     };

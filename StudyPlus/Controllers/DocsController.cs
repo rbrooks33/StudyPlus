@@ -20,6 +20,36 @@ namespace StudyPlus.Controllers
         {
             _env = env;
         }
+
+        [Route("Event")]
+        [HttpGet]
+        public Result Event(string source, [FromBody]EventAction action)
+        {
+            var result = new Result();
+
+            try
+            {
+                using (var dblocal = new LiteDatabase(db))
+                {
+                    switch(source)
+                    {
+                        case "Model":
+
+                            result.Data = new Doc();
+                            result.Success = true;
+
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Data = ex;
+            }
+
+            return result;
+        }
+
         [Route("GetComputerName")]
         [HttpGet]
         public Result GetComputerName()

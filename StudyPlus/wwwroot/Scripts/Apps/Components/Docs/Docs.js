@@ -21,7 +21,10 @@
         Initialize: function (callback) {
             //Apps.Debug.Trace(this, 'Start.');
 
+            Apps.Data.RegisterMyPOST(Me, "Model", "../../../../api/Docs/Event?source=Model", null, true);
+            Me.Data.Posts.Model.Refresh({Args:[], DataString:''}, null, function (model) {
 
+            });
 
                 if (callback)
                     callback();
@@ -795,6 +798,10 @@
             //Apps.Debug.Trace(this, sender);
 
             switch (sender) {
+                case 'Model':
+
+
+                    break;
 
                 case 'open':
 

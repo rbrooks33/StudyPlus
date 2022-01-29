@@ -24,7 +24,7 @@ namespace StudyPlus.Controllers
             _env = env;
         }
         [Route("Event")]
-        public Result Event(string source, )
+        public Result Event(string source, EventAction action)
         {
             var result = new Result();
             var newBook = new StudyBook();
@@ -32,11 +32,14 @@ namespace StudyPlus.Controllers
             {
                 using (var db = new LiteDatabase(studyBooksDB))
                 {
-                    var table = db.GetCollection<StudyBook>("StudyBook");
-                    table.Upsert(newBook);
+                    switch (source)
+                    {
+                        case "Model":
 
-                    result.Data = newBook;
-                    result.Success = true;
+                            result.Data = new StudyBook();
+                            result.Success = true;
+                            break;
+                    }
                 }
             }
             catch (Exception ex)
