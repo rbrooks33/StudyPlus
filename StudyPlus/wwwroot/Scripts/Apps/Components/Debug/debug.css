@@ -1,4 +1,4 @@
-﻿.debugContainerStyle {
+﻿.DebugContentStyle {
     border: 1px darkgrey solid;
     position: fixed;
     bottom: 0px;
@@ -7,7 +7,17 @@
     background-color: lightgray;
     border-left-width: 1px;
     border-right-width: 1px;
+    z-index: 99999;
 }
+
+.debugcomponentmouseout {
+    font-weight: inherit;
+}
+
+.debugcomponentmouseover {
+    font-weight: bold;
+}
+
 .debugButton {
     width: 95px;
     height: 28px;
@@ -21,10 +31,38 @@
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
-    border-radius:5px;
+    border-radius: 5px;
 }
-.componentButton{
-       border: 1px solid black;
+
+.debugbuttongroup {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.noliststyle {
+    list-style: none;
+    /*    cursor:pointer;
+*/
+}
+
+.noliststyleparent:hover {
+    color: cornflowerblue;
+}
+
+.noliststyleparent:not(:hover) {
+    color: inherit;
+}
+
+.noliststylechild:hover {
+    color: cornflowerblue;
+}
+
+.noliststylechild:not(:hover) {
+    color: inherit;
+}
+
+.componentButton {
+    border: 1px solid black;
     width: 146px;
     height: 30px;
     margin-top: 14px;
@@ -34,12 +72,13 @@
     background-color: darkgray;
     padding-top: 4px;
     padding-left: 9px;
-    cursor:pointer;
+    cursor: pointer;
 }
-.debugButton :hover
-{
-    background-color:aliceblue;
+
+.debugButton :hover {
+    background-color: aliceblue;
 }
+
 .fourth-level-menu {
     position: absolute;
     /*top: 0;*/
@@ -55,9 +94,10 @@
         height: 30px;
         background: #999999;
     }
-.fourth-level-menu > li:hover {
-    background: #CCCCCC;
-}
+
+        .fourth-level-menu > li:hover {
+            background: #CCCCCC;
+        }
 
 .third-level-menu {
     position: absolute;
@@ -96,54 +136,55 @@
         background: #999999;
     }
 
-    .second-level-menu > li:hover {
-        background: #CCCCCC;
-    }
+        .second-level-menu > li:hover {
+            background: #CCCCCC;
+        }
 
 .top-level-menu {
     list-style: none;
     padding: 0;
     margin: 0;
 }
+
 .debugButtonDropdown {
     position: relative;
     top: 14px;
     left: 15px;
 }
 
-    .top-level-menu > li {
-        position: relative;
-        float: left;
-        height: 30px;
-        width: 150px;
-        background: #999999;
+.top-level-menu > li {
+    position: relative;
+    float: left;
+    height: 30px;
+    width: 150px;
+    background: #999999;
+}
+
+    .top-level-menu > li:hover {
+        background: #CCCCCC;
     }
 
-        .top-level-menu > li:hover {
-            background: #CCCCCC;
-        }
+.top-level-menu li:hover > ul {
+    /* On hover, display the next level's menu */
+    display: inline;
+}
 
-    .top-level-menu li:hover > ul {
-        /* On hover, display the next level's menu */
-        display: inline;
+
+/* Menu Link Styles */
+
+.top-level-menu a /* Apply to all links inside the multi-level menu */ {
+    font: bold 14px Arial, Helvetica, sans-serif;
+    color: #FFFFFF;
+    text-decoration: none;
+    padding: 0 0 0 10px;
+    /* Make the link cover the entire list item-container */
+    display: block;
+    line-height: 30px;
+}
+
+    .top-level-menu a:hover {
+        color: #000000;
     }
-
-
-    /* Menu Link Styles */
-
-    .top-level-menu a /* Apply to all links inside the multi-level menu */ {
-        font: bold 14px Arial, Helvetica, sans-serif;
-        color: #FFFFFF;
-        text-decoration: none;
-        padding: 0 0 0 10px;
-        /* Make the link cover the entire list item-container */
-        display: block;
-        line-height: 30px;
-    }
-
-        .top-level-menu a:hover {
-            color: #000000;
-        }
 
 #primary_nav_wrap {
     margin-top: 15px
@@ -210,10 +251,11 @@
         #primary_nav_wrap ul li:hover > ul {
             display: block
         }
+
 .debugActionButtonStyle {
     float: right;
     position: relative;
     top: -30px;
     right: 11px;
-    margin-top:9px;
+    margin-top: 9px;
 }

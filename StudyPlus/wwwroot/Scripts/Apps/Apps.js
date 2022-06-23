@@ -1,41 +1,49 @@
 ﻿window.Apps = {
     Components: [],
     UI: [],
-    LocalComponentsReady: function () {
-        $ = jQuery.noConflict(true); //Allows legacy jquery to continue to be used
+    //LocalComponentsReady: function () {
+    //    $ = jQuery.noConflict(true); //Allows legacy jquery to continue to be used
 
-    },
+    //},
     PreInit: function () {
 
 
         Apps.SetPolyfills();
 
-        Apps['ActiveDeployment'] = {
-            "Active": true,
-            "Version": new Date().getDate(),
-            "WebRoot": location.protocol + "//" + location.hostname,
-            "VirtualFolder": "",
-            "Port": location.port,
-            "AppsRoot": "Scripts/Apps",
-            "Debug": true,
-            "Test": false,
-            "Authenticated": false,
-            "AgencyID": null
-        };
+        Apps.Download('/AppsJSCustomDeployment.json', function (customDeploymentString) {
 
+            if (customDeploymentString.length == 0) {
+                Apps['ActiveDeployment'] = {
+                    "Active": true,
+                    "Version": new Date().getDate(),
+                    "WebRoot": location.protocol + "//" + location.hostname,
+                    "VirtualFolder": "",
+                    "Port": location.port,
+                    "AppsRoot": "Scripts/Apps",
+                    "Debug": true,
+                    "Test": false,
+                    "Authenticated": false,
+                    "AgencyID": null
+                };
+            }
+            else {
+                Apps['ActiveDeployment'] = JSON.parse(customDeploymentString);
+            }
 
-        //if (location.pathname.toLowerCase().indexOf('default.aspx') > 0) {
-        //    Apps.ActiveDeployment['EnabledComponents'] = [
-        //        {
-        //            ''
-        //        }
-        //    ];
-        //}
+            //if (location.pathname.toLowerCase().indexOf('default.aspx') > 0) {
+            //    Apps.ActiveDeployment['EnabledComponents'] = [
+            //        {
+            //            ''
+            //        }
+            //    ];
+            //}
 
-        Apps.LoadDeployment(function () {
-            if (Apps.Settings.Debug)
-                console.log('active deployment loaded (with auth)');
+            Apps.LoadDeployment(function () {
+                if (Apps.Settings.Debug)
+                    console.log('active deployment loaded (with auth)');
+            });
         });
+
     },
     Test: function () {
         if (Apps.ActiveDeployment.Test) {
@@ -76,6 +84,9 @@
     GetAuthenticationData: function () {
         return JSON.parse(sessionStorage.getItem('AuthenticationData'));
     },
+    SaveAuthenticationData: function (authenticationData) {
+        sessionStorage.setItem('AuthenticationData', JSON.stringify(authenticationData));
+    },
     LoadDeployment: function (callback) {
         Apps.LoadSettings();
 
@@ -88,23 +99,38 @@
             if (Apps.Settings.Debug)
                 console.log('all resources loaded');
 
-            Apps.LoadComponentsConfig(function () {
+            Apps.AppDialogs.Register(window.Apps.AppDialogs, 'Exceptions', {
+                title: 'Exception',
+                dialogtype: 'full-width',
+                buttons: [
+                    {
+                        id: 'Exception_Close',
+                        text: 'Close',
+                        action: 'Apps.AppDialogs.Dialogs.Exceptions.Close()'
+                    }
+                ]
+            });
+
+            Apps.LoadComponentsConfig(false, function () {
 
                 if (Apps.Settings.Debug)
                     console.log('components config loaded');
 
-                ////Set up error dialog
-                Apps.Components.Common.Dialogs.Register('AppsErrorDialog', {
-                    title: 'Exception',
-                    size: 'full-width',
-                    templateid: 'templateMyDialog1',
-                    saveclick: function (id) {
-                        Apps.Dialogs.Close('AppsErrorDialog');
-                    },
-                    cancelclick: function (id) {
-                        Apps.Dialogs.Close('AppsErrorDialog');
-                    }
-                });
+                //////Set up error dialog
+                //Apps.AppDialogs.Register(window.Apps, 'AppsErrorDialog', {
+                //    title: 'Exception',
+                //    size: 'full-width',
+                //    templateid: 'templateMyDialog1',
+                //    saveclick: function (id) {
+                //        Apps.AppDialogs.Dialogs.Close('AppsErrorDialog');
+                //    },
+                //    cancelclick: function (id) {
+                //        Apps.AppDialogs.Dialogs.Close('AppsErrorDialog');
+                //    }
+                //});
+
+                //App dialog
+
                 if (callback)
                     callback()
 
@@ -369,19 +395,24 @@
 
 
     },
-    LoadComponentsConfig: function (callback) {
+    LoadComponentsConfig: function (returnonly, callback) {
 
-        Apps.Components = [];
+        //returnonly = "read only"
+        if (!returnonly)
+            Apps.Components = [];
 
         if (!Apps.Settings.UseServer) {
 
             if (Apps.Settings.Debug)
                 console.log('loading components: auto mode');
 
-            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.js?version=' + Apps.Settings.Version, function (response) {
+            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.js?version=' + new Date().getTime(), function (response) {
+
+                let componentsFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components';
 
                 var components = JSON.parse(response);
-                let componentsFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components';
+                var priorityComponents = Enumerable.From(components.Components).Where(function (c) { return c.Priority > 0; }).ToArray();
+                Apps.NonPriorityComponents = Enumerable.From(components.Components).Where(function (c) { return c.Priority == 0 || c.Priority == null; }).ToArray();
 
                 //if (Apps.ActiveDeployment.Test) {
                 //    components.Components.push({
@@ -399,17 +430,69 @@
                 //        "IsOnDisk": false
                 //    });
                 //}
+                //if (callback)
+                //    callback(components);
 
-                Apps.LoadComponents(null, components.Components, componentsFolder);
+                //if(!returnonly)
+                Apps.LoadPriorityComponents(priorityComponents);
             });
         }
         //Apps.ComponentsReady = callback; //just for testing, external app needs to wire this up
+    },
+    PriorityComponentsReady: function () {
+        let componentsFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components';
+        Apps.LoadComponents(null, Apps.NonPriorityComponents, componentsFolder);
+    },
+    LoadPriorityComponents: function (priorityComponents) {
+
+        let componentsFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components';
+
+        $.each(priorityComponents, function (index, c) {
+
+            if (
+                (c.Load == null || c.Load == true) &&
+                (c.ModuleType === 'require' || c.ModuleType == null)) {
+
+                if (Apps.Settings.Debug)
+                    console.log('loading priority component: ' + c.Name);
+
+                Apps.CountDownPriorityComponents.count++;
+
+                require([componentsFolder + '/' + c.Name + '/' + c.Name + '.js?version=' + Apps.Settings.Version], function (cObj) {
+
+                    Apps.Components[c.Name] = cObj;
+                    cObj['Path'] = '/Components/' + c.Name;
+
+                    //Forgot why this was needed (rb 1/24/2022)
+                    //if (typeof c === 'function')
+                    //    c = new c();
+
+                    if (c.UI) {
+                        Apps.LoadUI(c.Name, cObj, function () {
+                            if (c.Initialize)
+                                cObj.Initialize();
+                        });
+                    }
+                    else {
+                        if (c.Initialize)
+                            cObj.Initialize();
+                    }
+
+
+                    Apps.CountDownPriorityComponents.check();
+                });
+            }
+
+
+        });
+
     },
     LoadComponents: function (parentComponent, components, componentsFolder) {
 
         Apps.CountDownComponents.count++;
 
         if (components) {
+
             components.forEach(function (c, index) {
 
                 //if (c.Load && c.ModuleType === 'es6') {
@@ -453,11 +536,13 @@
                 parentComponent[config.Name] = c;
                 c['Parent'] = parentComponent;
                 c['Path'] = c.Parent.Path + '/' + config.Name;
+                c['RelativePath'] = c.Parent.RelativePath + '/' + config.Name;
             }
             else {
                 //Top level (e.g. "Apps.Components.*")
                 Apps.Components[config.Name] = c;
-                c['Path'] = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/' + config.Name;
+                c['Path'] = '/Components/' + config.Name;
+                c['RelativePath'] = '/Components/' + config.Name;
             }
 
             if (typeof c === 'function')
@@ -500,7 +585,7 @@
     LoadUI: function (configName, component, callback) {
         if (!component['UI']) {
 
-            Apps.Download(component.Path + '/' + configName + '.html?version=' + Apps.ActiveDeployment.Version, function (data) {
+            Apps.Download('/Scripts/Apps/' + component.Path + '/' + configName + '.html?version=' + Apps.ActiveDeployment.Version, function (data) {
 
                 component['UI'] = new Apps.Template({ id: configName, content: data });
                 component['UI'].Load(data);
@@ -513,7 +598,7 @@
                     component.UI.Templates[template.id] = new Apps.ComponentTemplate({ id: template.id, content: template.innerHTML });
                 });
 
-                Apps.LoadStyle(component.Path + '/' + configName + '.css?version=' + Apps.ActiveDeployment.Version);
+                Apps.LoadStyle('/Scripts/Apps/' + component.Path + '/' + configName + '.css?version=' + Apps.ActiveDeployment.Version);
 
                 if (callback)
                     callback();
@@ -667,12 +752,17 @@
                     if (callback)
                         callback(this.response);
                 }
+                else if (this.status == 404) {
+                    if (callback) {
+                        callback('');
+                    }
+                }
             };
             xhttp.open('GET', path, true);
             xhttp.send();
         }
         catch (err) {
-            console.log('Unable to download ' + path + '. Component files are optional.');
+            console.log('Unable to download ' + path + '.');
         }
     },
     CountDownScriptResources: {
@@ -714,6 +804,19 @@
                 Apps.ResourcesReady();
         }
     },
+    CountDownPriorityComponents: {
+        count: 0,
+        check: function () {
+            this.count--;
+            if (this.count === 0) {
+                this.calculate();
+            }
+        },
+        calculate: function () {
+            if (Apps.PriorityComponentsReady)
+                Apps.PriorityComponentsReady();
+        }
+    },
     CountDownComponents: {
         count: 0,
         check: function () {
@@ -724,14 +827,26 @@
         },
         calculate: function () {
 
-            Apps.LocalComponentsReady();
+            //Apps.LocalComponentsReady();
 
             if (Apps.ComponentsReady) {
 
                 Apps.ComponentsReady();
 
-                if (Apps.ActiveDeployment.Debug)
-                    Apps.Notify('warning', 'Debug configuration is enabled.');
+                if (Apps.ActiveDeployment.Debug) {
+
+                    //    Apps.Notify('warning', 'Debug configuration is enabled.');
+
+                    //    require(['/Scripts/Apps/Components/Debug/Debug.js'], function (debug) {
+
+                    //        debug['Path'] = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/Debug';
+                    //        Apps.LoadUI('Debug', debug, function () {
+                    //            debug.Initialize();
+                    //        });
+
+
+                    //    });
+                }
                 if (Apps.ActiveDeployment.Test) {
                     Apps.Notify('warning', 'Test mode is enabled. Running tests...');
 
@@ -901,6 +1016,7 @@
     },
     PostSync: function (url, dataString, callback) {
         Apps.Ajax('POST', url, dataString, function (error, result) {
+
             Apps.HandleAjaxResult(error, result, callback);
         }, null, true);
     },
@@ -933,40 +1049,54 @@
         xhttp.send();
     },
     HandleAjaxResult: function (error, result, callback) {
-        //Handle result
-        if (!error) {
-            if (result.Success) {
-                //Sunny day, all good
-                if (callback)
-                    callback(result);
-            }
-            else {
 
-                //Check if want to send a custom message along with failure
-                if (!result.ShowFailMessage) {
-
-                    vNotify.error({ text: 'A problem ocurred on the server.', title: 'Server Error', sticky: false, showClose: true });
-                    let textDiv = $('body > div.vnotify-container.vn-top-right > div > div.vnotify-text');
-                    textDiv.append('<div class="btn btn-dark" style="margin-top:10px;" onclick="Apps.Components.Helpers.OpenResponse(\'' + escape(JSON.stringify(result)) + '\');">View Response</div>');
+        if (!error.responseText) {
+            //Handle result
+            if (!error) {
+                if (result.Success) {
+                    //Sunny day, all good
+                    if (callback)
+                        callback(result);
                 }
                 else {
-                    Apps.Notify('warning', result.FailMessage);
+
+                    //Check if want to send a custom message along with failure
+                    if (result.FailMessages.length > 0) {
+
+                        vNotify.error({ text: 'One or more code or logic failures happened.', title: 'Fail Messages', sticky: false, showClose: true });
+                        let textDiv = $('body > div.vnotify-container.vn-top-right > div > div.vnotify-text');
+                        textDiv.html('<div class="btn btn-dark" style="margin-top:10px;" onclick="Apps.AppDialogs.Dialogs.Exceptions.Open(\'' + escape(JSON.stringify(result)) + '\');">View Fail Messages</div>');
+                    }
+                    else {
+                        vNotify.error({ text: 'Communication to the server failed but there were no Fail Messages.', title: 'Communication Failure', sticky: false, showClose: true });
+                        let textDiv = $('body > div.vnotify-container.vn-top-right > div > div.vnotify-text');
+                        textDiv.html('<div class="btn btn-dark" style="margin-top:10px;" onclick="Apps.AppDialogs.Dialogs.Exceptions.Open(\'' + escape(JSON.stringify(result)) + '\');">View Communication Failure</div>');
+                    }
+
+                    if (callback)
+                        callback(result);
                 }
+            }
+            else {
+                //Apps.Notify('error', 'An exception happened during the last operation. Response: ' + responseText); //esult.inn. See the error dialog and logs for more information.');
+
+                //if (Apps.Settings.Debug) {
+                //    Apps.Components.Helpers.Dialogs.Content('AppsErrorDialog', JSON.stringify(result));
+                //    Apps.Components.Helpers.Dialogs.Open('AppsErrorDialog');
+                //}
+                vNotify.error({ text: 'An uncaught code exception ocurred.', title: 'Server Exception', sticky: false, showClose: true });
+                let textDiv = $('body > div.vnotify-container.vn-top-right > div > div.vnotify-text');
+                textDiv.html('<div class="btn btn-dark" style="margin-top:10px;" onclick="Apps.AppDialogs.Dialogs.Exceptions.Open(\'' + escape(JSON.stringify(result)) + '\');">Server Exception</div>');
 
                 if (callback)
                     callback(result);
             }
         }
         else {
-            //Apps.Notify('error', 'An exception happened during the last operation. Response: ' + responseText); //esult.inn. See the error dialog and logs for more information.');
-
-            //if (Apps.Settings.Debug) {
-            //    Apps.Components.Helpers.Dialogs.Content('AppsErrorDialog', JSON.stringify(result));
-            //    Apps.Components.Helpers.Dialogs.Open('AppsErrorDialog');
-            //}
-            vNotify.error({ text: 'A problem ocurred on the server.', title: 'Server Error', sticky: false, showClose: true });
+            //Handle response error object
+            vNotify.error({ text: 'An communication error ocurred.', title: 'Communication Error', sticky: false, showClose: true });
             let textDiv = $('body > div.vnotify-container.vn-top-right > div > div.vnotify-text');
-            textDiv.append('<div class="btn btn-dark" style="margin-top:10px;" onclick="Apps.Components.Helpers.OpenResponse(\'' + escape(JSON.stringify(result)) + '\');">View Response</div>');
+            textDiv.html('<div class="btn btn-dark" style="margin-top:10px;" onclick="Apps.AppDialogs.Dialogs.Exceptions.Open(\'' + escape(JSON.stringify(error)) + '\');">Communication Error</div>');
 
             if (callback)
                 callback(result);
@@ -1014,6 +1144,7 @@
 
         //if (dataObj == null)
         //    dataObj = new Object();
+        let authKeyValue = Apps.GetAuthenticationData();
 
         $.ajax({
             type: verb,
@@ -1022,8 +1153,7 @@
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             headers: {
-                'Authorization': 'Bearer ' + Apps.Token,
-                'by': Apps.By
+                'authKey': authKeyValue
             },
             async: !sync,
             success: function (result) {
@@ -1072,6 +1202,7 @@
             })();
         }
     }
+
 
 };
 Apps.Data = {
@@ -1133,7 +1264,7 @@ Apps.Data = {
                         parentObj.Data[methodDataName].Data = result.Data;
                     }
                     else
-                        parentObj.Data.HandleException(result);
+                        parentObj.HandleAjaxResult(result);
 
                     parentObj.Data[methodDataName].Result = result;
 
@@ -1173,7 +1304,7 @@ Apps.Data = {
                         me.Data.Gets[getGetName].Data = result.Data;
                     }
                     else
-                        Apps.Data.HandleException(result);
+                        Apps.HandleAjaxResult(result);
 
                     me.Data.Gets[getGetName].Result = result;
 
@@ -1208,12 +1339,20 @@ Apps.Data = {
 
                 let refreshPost = sync ? Apps.Post : Apps.PostSync;
 
-                refreshPost(newPath, JSON.stringify(obj), function (result) {
+                if (this.Handler)
+                    refreshPost = this.Handler;
+
+                refreshPost(newPath, JSON.stringify(obj), function (result) { //error is handled upstream 
 
                     var postPostName = postName;
 
+                    // if (!error) {
                     me.Data.Posts[postPostName].Success = result.Success;
                     me.Data.Posts[postPostName].Data = result.Data;
+                    // }
+                    //else
+                    //     Apps.Data.HandleException(result);
+
                     me.Data.Posts[postPostName].Result = result;
 
                     if (callback)
@@ -1251,7 +1390,7 @@ Apps.Data = {
                     }
                 }
                 else {
-                    Apps.Data.HandleException(result);
+                    Apps.HandleAjaxResult(result);
                 }
             });
         }
@@ -1259,20 +1398,20 @@ Apps.Data = {
             Apps.Notify('warning', 'Data source name not found or more than one found: ' + dataName);
 
     },
-    HandleException: function (result) {
-        if (result) {
-            if (result.responseText && result.responseText.length > 50) {
-                Apps.Notify('error', 'From server: ' + result.responseText.substring(0, 50));
-                //vNotify.error({ text: 'text', title: 'title', sticky: true, showClose: true });
-            }
-            else if (result.responseText) {
-                Apps.Notify('error', 'From server: ' + result.responseText);
-            }
-        }
-        else {
-            Apps.Notify('error', 'Unable to contact web server.');
-        }
-    }
+    //    HandleException: function (result) {
+    //        if (result) {
+    //            if (result.responseText && result.responseText.length > 50) {
+    //                Apps.Notify('error', 'From server: ' + result.responseText.substring(0, 50));
+    //                //vNotify.error({ text: 'text', title: 'title', sticky: true, showClose: true });
+    //            }
+    //            else if (result.responseText) {
+    //                Apps.Notify('error', 'From server: ' + result.responseText);
+    //            }
+    //        }
+    //        else {
+    //            Apps.Notify('error', 'Unable to contact web server.');
+    //        }
+    //    }
 };
 Apps.Template = function (settings) {
 
@@ -1510,7 +1649,7 @@ Apps['AppDialogs'] = {
         newDialog.Selector.html(baseContent);
 
         me.Dialogs[dialogName] = newDialog;
-        me.Dialogs.push(newDialog);
+
     },
     GetBaseTemplate: function () {
 
@@ -1574,8 +1713,9 @@ Apps['AppDialogs'] = {
             Content: content,
             X: null,
             Y: null,
-            Open: function () {
-                $('#myDialog_' + newid + '_Content').html(this.Content);
+            Open: function (incomingContent) {
+                let content = incomingContent != undefined ? incomingContent : this.Content;
+                $('#myDialog_' + newid + '_Content').html(unescape(content));
                 $("#myDialog_" + newid + '_DialogContainer').fadeIn("slow");
             },
             Close: function () {
@@ -1584,8 +1724,15 @@ Apps['AppDialogs'] = {
 
         };
         return result;
-    },
+    }
 
+};
+
+Apps['Grid'] = {
+    Grids: [],
+    RegisterMyGrid: function () {
+
+    }
 };
 
 //This handles UI chunks. 

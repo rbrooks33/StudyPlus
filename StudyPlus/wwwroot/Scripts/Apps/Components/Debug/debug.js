@@ -1,76 +1,30 @@
 ﻿define([], function () {
     var Me = {
-        Initialize: function () {
 
-            //For now put on Apps namespace for backwards compatibility:
-            Apps.Debug = Me;
+        Initialize: function (callback) {
 
-            //Apps.Dialogs.Register2('dialogDebugShowData', {
-            //    width: 500,
-            //    height: 500,
-            //    title: { color: 'steelblue', text: '' },
-            //    content: '',
-            //    saveclick: function (id) {
-            //        //CommandBuilder.Save(id); //Requires global
-            //    }
-            //});
+            Me.UI.Show();
 
-            //Apps.Dialogs.Register2('dialogDesignApps', {
-            //    width: 900,
-            //    height: 500,
-            //    title: { color: 'steelblue', text: 'Apps Events' },
-            //    content: '',
-            //    saveclick: function (id) {
-            //        Apps.Dialogs.Close('dialogDesignApps');
-            //    },
-            //    cancelclick: function (id) {
-            //        Apps.Dialogs.Close(id);
-            //    }
-            //});
+            Apps.Data.RegisterMyGET(Me, 'AddComponent', '/api/CLI/AddComponent?relativePath={0}&name={1}', null, true);
+            Apps.Data.RegisterMyGET(Me, 'RemoveComponent', '/api/CLI/RemoveComponent?relativePath={0}&name={1}', null, true);
 
-            //Apps.Dialogs.Register2('dialogComponents', {
-            //    width: 800,
-            //    height: 500,
-            //    title: { color: 'steelblue', text: 'Apps Components' },
-            //    content: '',
-            //    saveclick: function (id) {
-            //        Apps.Dialogs.Close('dialogComponents');
-            //    },
-            //    cancelclick: function (id) {
-            //        Apps.Dialogs.Close(id);
-            //    }
-            //});
+            Apps.AppDialogs.Register(Me, 'Components', {
+                title: 'Components',
+                dialogtype: 'full-width',
+                buttons: [
+                    {
+                        id: 'Components_Close',
+                        text: 'Close',
+                        action: 'Apps.AppDialogs.Close(\'Components\');'
+                    }
+                ]
+            });
 
-            //Apps.Dialogs.Register2('dialogAppsSettings', {
-            //    width: 524,
-            //    height: 500,
-            //    title: { color: 'steelblue', text: 'Apps Settings' },
-            //    content: '',
-            //    saveclick: function (id) {
-            //        Apps.Debug.Event('save_config');
-            //        Apps.Dialogs.Close('dialogAppsSettings');
-            //    },
-            //    cancelclick: function (id) {
-            //        Apps.Dialogs.Close(id);
-            //    }
-            //});
+            if (Apps.ActiveDeployment.Debug)
+                Me.BuildBar();
 
-            ////var centeredLeft = Apps.Util.CenteredLeft($('AppsErrorDialog').width());
-
-            //Apps.Dialogs.Register2('AppsErrorDialog', {
-            //    width: 500,
-            //    height: 300,
-            //    style: 'position:absolute;left:100px;top:100px;',
-            //    title: { color: 'steelblue', text: 'Apps Error' },
-            //    content: '',
-            //    saveclick: function (id) {
-            //        Apps.Dialogs.Close('AppsErrorDialog');
-            //    },
-            //    cancelclick: function (id) {
-            //        Apps.Dialogs.Close('AppsErrorDialog');
-            //    }
-
-            //});
+            if (callback)
+                callback();
 
         },
         InitializeSmartTags: function () {
@@ -83,39 +37,210 @@
         },
         BuildBar: function () {
 
-            $(document.body).append('<div id="divDebugContainer"></div>');
+            //$(document.body).append('<div id="divDebugContainer"></div>');
 
-            Apps.Util.LoadTemplate2('templateDebugContainer', Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Debug/debug.html', function () {
-
-                Apps.Util.LoadStyle(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Debug/debug.css');
-
-                Apps.Util.DropTemplate('templateDebugContainer', 'divDebugContainer');
-
-                //Data
-                if (Apps.Data) {
-                    Apps.Debug.BuildData();
-                }
-                //Pages
-                if (Apps.Pages) {
-                    Apps.Debug.BuildPages();
-                }
-                //LOGS
-                if (Apps.Logs) {
-                    Apps.Debug.Build('Logs', 'logs', Apps.Logs);
-                }
-                //SMART TAGS
-                Apps.Debug.InitializeSmartTags();
-            });
+            $('#contentDebug').html(Me.UI.Templates.Bar.HTML());
 
         },
+        ShowComponentHTML: '',
+        //ShowComponentNamespace: '',
+        ShowComponents: function () {
 
+            //Apps.LoadComponentsConfig(true, function (components) {
+            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.js?version=' + new Date().getTime(), function (response) {
+
+                var components = JSON.parse(response).Components;
+
+                //var compObj = Object.keys(Apps.Components);
+                Me.ShowComponentHTML = '<div id="divComponentsContainer" style="border: 3px solid cornflowerblue; margin-left: 8px; margin-top:-5px; border-top-right-radius: 5px;">';
+                Me.ShowComponentHTML += '<ul>';
+
+                $.each(components, function (index, c) {
+
+                    c['PreviewPath'] = '/Scripts/Apps/Components/' + c.Name;
+
+                    //Top-level component
+                    let parentnamespace = c.Name;
+                    Me.ShowComponentHTML += '<li id="debug_component_' + c.Name + '" class="noliststyle" style="font-size:15px;cursor:pointer;" ';
+                    Me.ShowComponentHTML += 'onmouseover="Apps.Components.Debug.ComponentMouseOver(\'debug_component_' + c.Name + '\');" ';
+                    Me.ShowComponentHTML += 'onmouseout="Apps.Components.Debug.ComponentMouseOut(\'debug_component_' + c.Name + '\');" ';
+                    Me.ShowComponentHTML += 'onclick="Apps.Components.Debug.ComponentClick(\'' + c.Name + '\', \'' + parentnamespace + '\');" ';
+                    Me.ShowComponentHTML += '>';
+                    Me.ShowComponentHTML += c.Name + '&nbsp;';
+                    /*
+                    Me.ShowComponentHTML += '<div class="btn-group">';
+                    Me.ShowComponentHTML +=         '<div class="btn btn-primary btn-sm py-0 px-0">';
+                    Me.ShowComponentHTML +=             '<i class="fa fa-minus" style="cursor:pointer;" onclick="Apps.Components.Debug.RemoveComponent(\'' + parentnamespace + '\,\'' + c.Name + '\');"></i>';
+                    Me.ShowComponentHTML +=         '</div>';
+                    Me.ShowComponentHTML +=         '<div class="btn btn-primary btn-sm py-0 px-0">';
+                    Me.ShowComponentHTML +=             '<i class="fa fa-plus" style="cursor:pointer;" onclick="Apps.Components.Debug.AddComponent(\'' + parentnamespace + '\,\'' + c.Name + '\');"></i>';
+                    Me.ShowComponentHTML +=         '</div >';
+                    Me.ShowComponentHTML +=     '</div>';
+                    */
+                    //Data
+                    //Me.ShowComponentHTML +=     '<ul>';
+
+                    //if (Apps.Components[c.Name] && Apps.Components[c.Name].Data) {
+                    //    $.each(Apps.Components[c.Name].Data.Gets, function (index, get) {
+                    //        Me.ShowComponentHTML += '<li>' + get.DataName + '</li>';
+                    //    });
+                    //}
+                    //Me.ShowComponentHTML += '</ul>'
+
+                    //Sub components
+                    //Me.ShowComponentHTML +=         '<li class="noliststyle noliststylechild">';
+                    //Me.ShowComponentHTML +=         '</li>';
+
+                    Me.ShowComponentHTML += '</li>';
+                    Me.ShowSubComponents(parentnamespace, c);
+
+
+                });
+
+                Me.ShowComponentHTML += '</ul>';
+                Me.ShowComponentHTML += '</div>';
+
+                let componentTree = Me.UI.Templates.ComponentsTab.HTML() + Me.ShowComponentHTML;
+                let tabs = Me.UI.Templates.ComponentEditorTabs.HTML();
+
+                //Preview HTML
+                let preview = Me.UI.Templates.Preview.HTML(['https://localhost:54321/index.html']);
+                let previewTab = Me.UI.Templates.PreviewTab.HTML();
+
+                let componentListHtml = Me.UI.Templates.Window.HTML([componentTree, tabs, previewTab + preview]);
+
+                //Fill Data tab
+                let dataHtml = 'hiya';
+
+                $('#ComponentEditor_DataTabContent')
+                    .html(dataHtml);
+
+
+                Me.Dialogs.Components.Open(componentListHtml);
+                Apps.Tabstrips.Initialize('ComponentEditorTabstrip');
+                Apps.Tabstrips.Select('ComponentEditorTabstrip', 0);
+
+                Apps.Tabstrips.Initialize('ComponentsTabstrip');
+                Apps.Tabstrips.Select('ComponentsTabstrip', 0);
+
+                //move components to tab content
+                //$('#ComponentsTab_MainTabContent').html($('#divComponentsContainer').detach());
+                $('#ComponentsTab_MainTabContent').hide(); //rather, hide it because list gets wacky when put into tabstrip
+
+                $('.ComponentEditorTabstrip-tabstrip-custom').css('width', '800px');
+
+                Apps.Tabstrips.Initialize('PreviewTabstrip');
+                Apps.Tabstrips.Select('PreviewTabstrip', 0);
+
+                //move preview to preview tab content
+                $('#PreviewTab_MainTabContent').html($('#debug_PreviewIframe').detach());
+
+                //Expand the html tab
+                $('#ComponentEditor_HTMLTabContent')
+                    .css('width', '100%')
+                    .css('border', '3px solid cornflowerblue')
+                    .css('border-top-right-radius', '5px');
+
+
+                //PreviewTab_MainTabContent
+                $('#PreviewTab_MainTabContent')
+                    .css('width', '100%')
+                    .css('border', '3px solid cornflowerblue')
+                    .css('border-top-right-radius', '5px');
+
+            });
+
+
+
+        },
+        ShowSubComponents: function (namespace, c) {
+            if (c.Components) {
+                let subcomponents = c.Components;
+
+                Me.ShowComponentHTML += '<ul>';
+
+                $.each(subcomponents, function (index, c) {
+                    c['PreviewPath'] = c.PreviewPath + '/' + c.Name;
+                    let mynamespace = namespace + '.' + c.Name;
+                    Me.ShowComponentHTML += '<li id="debug_component_' + c.Name + '" class="noliststyle" style="font-size:15px;cursor:pointer;" ';
+                    Me.ShowComponentHTML += 'onmouseover="Apps.Components.Debug.ComponentMouseOver(\'debug_component_' + c.Name + '\');" ';
+                    Me.ShowComponentHTML += 'onmouseout="Apps.Components.Debug.ComponentMouseOut(\'debug_component_' + c.Name + '\');" ';
+                    Me.ShowComponentHTML += 'onclick="Apps.Components.Debug.ComponentClick(\'' + c.Name + '\', \'' + mynamespace + '\');">';
+                    Me.ShowComponentHTML += c.Name + '&nbsp;';
+                    //Me.ShowComponentHTML +=     '<i class="fa fa-plus" style="cursor:pointer;" onclick="Apps.Components.Debug.AddComponent(\'' + mynamespace + '\',\'' + c.Name + '\');"></i>&nbsp;';
+                    //Me.ShowComponentHTML +=     '<i class="fa fa-minus" style="cursor:pointer;" onclick="Apps.Components.Debug.RemoveComponent(\'' + mynamespace + '\',\'' + c.Name + '\');"></i>';
+                    Me.ShowComponentHTML += '</li>';
+                    Me.ShowSubComponents(mynamespace, c);
+
+                });
+
+                //let cobj = eval('Apps.Components.' + namespace);
+
+                Me.ShowComponentHTML += '</ul>';
+            }
+        },
+        ComponentMouseOver(id) {
+            //Apps.Notify('success', 'hiya');
+            $('#' + id).removeClass('debugcomponentmouseout').addClass('debugcomponentmouseover');
+            event.stopPropagation();
+        },
+        ComponentMouseOut(id) {
+            //Apps.Notify('success', 'hiya');
+            $('#' + id).removeClass('debugcomponentmouseover').addClass('debugcomponentmouseout');
+            event.stopPropagation();
+        },
+        ComponentClick(configString, componentNamespace) {
+
+            //let config = JSON.parse(configString);
+            //let component = eval('Apps.Components.' + componentNamespace);
+
+            //Apps.Notify('success', 'hiya');
+            //let name = id.split('_')[2]; //e.g. debug_component_[name]
+
+            //$('#ComponentEditor_HTMLTabContent').html('hiya ' + id);
+            let path = previewPath + '/Preview.html';
+            let previewHtml = Me.UI.Templates.Preview.HTML([path]);
+            $('#debug_PreviewContainer').html(previewHtml);
+
+            //HTML tab
+            var templateNames = '';
+            $.each(Me.UI.Templates, function (t, index) {
+                templateNames += t;
+            });
+
+            $('#ComponentEditor_HTMLTabContent').html(Me.UI.Templates.Debug_HTMLEditor.HTML([templateNames]));
+            event.stopPropagation();
+        },
+        ShowTopology: function () {
+
+        },
+        AddComponent: function (parentPath, name) {
+            //Apps.Notify('warning', parentPath);
+            //let parentComponent = eval('Apps.' + parentPath);
+            Me.Data.Gets.AddComponent.Refresh([parentPath, 'new name'], function (result) {
+                if (Me.Data.Gets.AddComponent.Result.Success)
+                    Me.ShowComponents();
+                else
+                    Apps.Notify('warning', 'Show components failed.');
+            });
+        },
+        RemoveComponent: function (parentPath, name) {
+            //Apps.Notify('warning', parentPath);
+            //let parentComponent = eval('Apps.' + parentPath);
+            Me.Data.Gets.RemoveComponent.Refresh([parentPath, 'new name'], function (result) {
+                if (Me.Data.Gets.RemoveComponent.Result.Success)
+                    Me.ShowComponents();
+                else
+                    Apps.Notify('warning', 'Show components failed.');
+            });
+        },
         TraceIndex: 0,
         Traces: [],
         Trace: function (caller, desc) {
             if (Apps.Settings.Debug === true) {
                 var stack = (new Error).stack;
                 desc = desc ? ' (' + desc + ')' : '';
-                var traceText = '<span title="' + stack + '" style="color:' + caller.Color + ';">' + (caller.Name ? caller.Name : '') + '.'; // + arguments.callee.caller.name + '</span><i>' + desc + '</i>';
+                var traceText = '<span title="' + stack + '" style="color:' + caller.Color + ';">' + (caller.Name ? caller.Name : '') + '.' + arguments.callee.caller.name + '</span><i>' + desc + '</i>';
                 Apps.Debug.Traces.push({ traceindex: Apps.Debug.TraceIndex, caller: traceText });
                 Apps.Debug.TraceIndex++;
             }
@@ -159,6 +284,10 @@
 
         },
         BuildData: function () {
+
+            let datas = [];
+
+            $.each(Apps.Componet)
             var dataCount = Object.keys(Apps.Data).length;
 
             $("#linkAppsDataButton").text("Data (" + dataCount + ")");
@@ -370,7 +499,7 @@
 
                         }//enabled?
                     });
-                    pageContent += '</div>';
+                    pageContent += '</div>'
                     pageContent += '</td>';
                     pageContent += '<td style="vertical-align:top;">';
 
@@ -398,7 +527,7 @@
 
                 case 'new_component':
 
-                    Apps.CreateComponent2($('#txtNewComponentName').val(), 'react');
+                    Apps.CreateComponent($('#txtNewComponentName').val());
 
                     break;
 
@@ -545,10 +674,10 @@
                     Apps.Notify({
                         message: settings.notifymessage
                     }, {
-                            type: notifyType, //info, success, warning, danger
-                            delay: 400,
-                            animate: { enter: 'animated fadeInUp', exit: 'animated fadeOutDown' }
-                        });
+                        type: notifyType, //info, success, warning, danger
+                        delay: 400,
+                        animate: { enter: 'animated fadeInUp', exit: 'animated fadeOutDown' }
+                    });
                 }
 
                 if (settings.erroricon) {
@@ -676,11 +805,11 @@
             Apps.Notify({
                 message: message
             }, {
-                    type: type, //info, success, warning, danger
-                    delay: myDelay,
-                    animate: { enter: 'animated fadeInUp', exit: 'animated fadeOutDown' }
-                });
+                type: type, //info, success, warning, danger
+                delay: myDelay,
+                animate: { enter: 'animated fadeInUp', exit: 'animated fadeOutDown' }
+            });
         }
     };
     return Me;
-});
+})

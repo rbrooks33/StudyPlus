@@ -121,6 +121,25 @@
       "ModuleName": "Bind",
       "FileName": "bind.js",
       "Description": ""
-    }
+      },
+      {
+          "Name": "Apps Tabstrip Helper",
+          "Enabled": true,
+          "LoadFirst": false,
+          "Order": 2,
+          "ModuleType": "require",
+          "ModuleName": "Tabstrips",
+          "FileName": "tabstrip.js",
+          "Description": "Quick tabs. This version requires util.js in references."
+      },
+      {
+          "Name": "Apps Tabstrip CSS",
+          "Enabled": true,
+          "LoadFirst": false,
+          "Order": 1,
+          "ModuleType": "style",
+          "FileName": "tabstrip.css",
+          "Description": "Decorates Apps Tabstrip."
+      }
   ]
 }

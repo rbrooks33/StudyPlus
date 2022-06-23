@@ -7,13 +7,15 @@
       "Description": "AppsJS dev utilities.",
       "ComponentFolder": "",
       "TemplateFolder": "",
-      "Load": false,
-      "Initialize": false,
+          "Load": true,
+      "UI":true,
+      "Initialize": true,
       "Color": "blue",
       "ModuleType": "require",
       "Framework": "default",
       "Components": [],
-      "IsOnDisk": false
+          "IsOnDisk": false,
+      "Priority":1
     },
     {
       "Name": "ReactTest",

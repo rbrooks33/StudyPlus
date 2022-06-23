@@ -1,40 +1,70 @@
-﻿
+﻿<script id="Bar" type="text/template">
 
-    <div id="divDebugDataDropdown" class="debugButtonDropdown">
-        <ul class="top-level-menu">
-
-            <li class="debugButton">
-                <a id="linkAppsDataButton" style="border-radius:5px;" href="#">Data</a>
-
-                <ul class="data second-level-menu"></ul>
-
-            </li>
-
-        </ul>
+    <div id="divDebug" class="debugContainerStyle">
+        <div class="btn-group debugbuttongroup">
+            <div class="btn btn-primary" onclick="Apps.Components.Debug.ShowComponents();">Components</div>
+            <div class="btn btn-success" onclick="Apps.Components.Debug.ShowHTML();">HTML</div>
+            <div class="btn btn-warning" onclick="Apps.Components.Debug.ShowData();">Data</div>
+            <div class="btn btn-primary" onclick="Apps.Components.Debug.ShowTopology();">Topology</div>
+        </div>
     </div>
-    <div style="position: relative;    left: 190px;    top: 12px;">
-        <input type="text" id="txtNewComponentName" style="border-radius: 5px;border-style: inherit;height: 31px;" />
-        <input type="button" class="btn btn-default" onclick="Apps.Debug.Event('new_component');" value="New Component" />
-        <!--<input type="checkbox" id="chkDebugShowSmartTags" />&nbsp;Show Smart Tags-->
-    </div>
-    <!-- Controls -->
-    <div id="divDebugControls">
-        <!--<input type="button" id="btnSettingsPage" class="btn btn-default debugActionButtonStyle" value="Settings" onclick="Apps.Debug.Event('settings');" />-->
-        <input type="button" id="btnEditPage" class="btn btn-default debugActionButtonStyle" value="Trace" onclick="Apps.Debug.Event('design');" />
-        <!--<input type="button" id="btnDebugTestPage" class="btn btn-default debugActionButtonStyle" value="Test" onclick="Apps.Debug.Event('test');" />-->
-    </div>
+</script>
 
 
 
-<script id="templateAppsDebugDataShow" type="text/template">
+<script id="Window" type="text/template">
 
-    <tr>
-        <td></td>
-    </tr>
+    <!--
+        0 = Component tree html
+        1 = Component detail
+        2 = Preview
+    -->
+    <table>
+        <tr>
+            <td>{0}</td>
+            <td valign="top" style="padding-left:10px;">{1}</td>
+            <td valign="top" style="padding-left:10px;"><div id="debug_PreviewContainer">{2}</div></td>
+        </tr>
+    </table>
 
 </script>
 
-<script id="templateAppsSettings" type="text/template">
+<script id="Preview" type="text/template">
+    <!--
+        0 = iFrame source
+    -->
+    <div id="debug_PreviewIframe">
+        <iframe src="{0}" style="width: 850px; height: 600px;"></iframe>
+    </div>
+</script>
+
+<script id="ComponentsTab" type="text/template">
+
+    <div id="ComponentsTabstrip" data-type="tabstrip">
+        <div data-tabstrip-tabtitle="Components" data-tabstrip-templateid="ComponentsTab_MainTab"></div>
+    </div>
+
+</script>
+
+<script id="PreviewTab" type="text/template">
+
+    <div id="PreviewTabstrip" data-type="tabstrip">
+        <div data-tabstrip-tabtitle="Preview" data-tabstrip-templateid="PreviewTab_MainTab"></div>
+    </div>
+
+</script>
+
+<script id="ComponentEditorTabs" type="text/template">
+
+    <div id="ComponentEditorTabstrip" data-type="tabstrip">
+        <div data-tabstrip-tabtitle="HTML" data-tabstrip-templateid="ComponentEditor_HTMLTab"></div>
+        <div data-tabstrip-tabtitle="JS" data-tabstrip-templateid="ComponentEditor_JSTab"></div>
+        <div data-tabstrip-tabtitle="DATA" data-tabstrip-templateid="ComponentEditor_DataTab"></div>
+    </div>
+
+</script>
+
+<script id="Settings" type="text/template">
 
     <h3>Apps Settings</h3>
     <h4>Web Root</h4>
@@ -47,5 +77,18 @@
     <input id="txtAppsRoot" value="{3}" class="form-control" />
     <h4>Required Components</h4>
     <input id="txtRequired" value="{4}" class="form-control" />
+
 </script>
 
+<script id="Debug_HTMLEditor" type="text/template">
+
+    <!--
+        0= templates
+    -->
+    <div style="display:flex; flex-flow:row">
+        <div>left {0}</div>
+        <div>right</div>
+
+    </div>
+
+</script>
