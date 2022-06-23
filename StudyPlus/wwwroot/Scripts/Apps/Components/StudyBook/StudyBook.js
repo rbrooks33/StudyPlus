@@ -132,8 +132,8 @@
             let book = JSON.parse(unescape(bookString));
 
             let editHtml = Apps.Util.GetHTML('templateEditHtml', [bookId, book[fieldName]]);
-            Apps.Components.Dialogs.Content('EditBookDialog_' + bookId, editHtml);
-            Apps.Components.Dialogs.Open('EditBookDialog_' + bookId);
+            Apps.Components.StudyBook.Dialogs[bookId].Content(editHtml);
+            Apps.Components.StudyBook.Dialogs[bookId].Open();
 
             //Append field name
             $('#BookViewer_' + bookId).append('<div id="BookViewer_FieldName_' + bookId + '" style="display:none;">' + fieldName + '</div>');
