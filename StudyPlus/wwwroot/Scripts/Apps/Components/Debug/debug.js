@@ -47,12 +47,12 @@
         ShowComponents: function () {
 
             //Apps.LoadComponentsConfig(true, function (components) {
-            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.js?version=' + new Date().getTime(), function (response) {
+            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.json?version=' + new Date().getTime(), function (response) {
 
                 var components = JSON.parse(response).Components;
 
                 //var compObj = Object.keys(Apps.Components);
-                Me.ShowComponentHTML = '<div id="divComponentsContainer" style="border: 3px solid cornflowerblue; margin-left: 8px; margin-top:-5px; border-top-right-radius: 5px;">';
+                Me.ShowComponentHTML = '<div id="divComponentsContainer" style="margin-left: 8px; margin-top:-5px; border-top-right-radius: 5px;">';
                 Me.ShowComponentHTML += '<ul>';
 
                 $.each(components, function (index, c) {
@@ -100,20 +100,16 @@
                 Me.ShowComponentHTML += '</ul>';
                 Me.ShowComponentHTML += '</div>';
 
-                let componentTree = Me.UI.Templates.ComponentsTab.HTML() + Me.ShowComponentHTML;
+                let componentTree = Me.ShowComponentHTML;
                 let tabs = Me.UI.Templates.ComponentEditorTabs.HTML();
 
                 //Preview HTML
-                let preview = Me.UI.Templates.Preview.HTML(['https://localhost:54321/index.html']);
+                let preview = Me.UI.Templates.Preview.HTML(['']); //https://localhost:54321/index.html']);
                 let previewTab = Me.UI.Templates.PreviewTab.HTML();
 
                 let componentListHtml = Me.UI.Templates.Window.HTML([componentTree, tabs, previewTab + preview]);
 
-                //Fill Data tab
-                let dataHtml = 'hiya';
-
-                $('#ComponentEditor_DataTabContent')
-                    .html(dataHtml);
+                //Data tab
 
 
                 Me.Dialogs.Components.Open(componentListHtml);
@@ -139,8 +135,22 @@
                 $('#ComponentEditor_HTMLTabContent')
                     .css('width', '100%')
                     .css('border', '3px solid cornflowerblue')
-                    .css('border-top-right-radius', '5px');
+                    .css('border-top-right-radius', '5px')
+                    .css('margin-top','-3px');
 
+                $('#ComponentEditor_DataTabContent')
+                    .css('margin-left', '-144px')
+                    .css('width', '100%')
+                    .css('border', '3px solid cornflowerblue')
+                    .css('border-top-right-radius', '5px')
+                    .css('margin-top', '-3px');
+
+                $('#ComponentEditor_JSTabContent')
+                    .css('margin-left', '-86px')
+                    .css('width', '100%')
+                    .css('border', '3px solid cornflowerblue')
+                    .css('border-top-right-radius', '5px')
+                    .css('margin-top', '-3px');
 
                 //PreviewTab_MainTabContent
                 $('#PreviewTab_MainTabContent')
@@ -192,24 +202,120 @@
         ComponentClick(configString, componentNamespace) {
 
             //let config = JSON.parse(configString);
-            //let component = eval('Apps.Components.' + componentNamespace);
+            let component = eval('Apps.Components.' + componentNamespace);
 
             //Apps.Notify('success', 'hiya');
             //let name = id.split('_')[2]; //e.g. debug_component_[name]
 
             //$('#ComponentEditor_HTMLTabContent').html('hiya ' + id);
-            let path = previewPath + '/Preview.html';
-            let previewHtml = Me.UI.Templates.Preview.HTML([path]);
-            $('#debug_PreviewContainer').html(previewHtml);
+            //let path = previewPath + '/Preview.html';
+            //let previewHtml = Me.UI.Templates.Preview.HTML([path]);
+            //$('#debug_PreviewContainer').html(previewHtml);
 
             //HTML tab
-            var templateNames = '';
-            $.each(Me.UI.Templates, function (t, index) {
-                templateNames += t;
+            var templateNames = '<table>';
+            templateNames += '<b>Templates</b>';
+            $.each(component.UI.Templates, function (t, index) {
+                templateNames += '<tr>';
+                templateNames += '<td>';
+                templateNames += '<div class="btn-group">';
+                templateNames += '<div class="btn btn-sm btn-primary" onclick="Apps.Components.Debug.ViewTemplate(\'' + t + '\',\'' + componentNamespace + '\');">View</div>';
+                templateNames += '<div class="btn btn-sm btn-success"  onclick="Apps.Components.Debug.RunTemplate(\'' + t + '\',\'' + componentNamespace + '\');">Run</div>&nbsp;' + t + '</td > ';
+                templateNames += '</div>';
+                templateNames += '</tr>';
+                templateNames += '<tr>';
+                templateNames += '<td><div id="divTemplateView' + t + '" style="display:none;"></div></td>';
+                templateNames += '</tr>';
             });
+            templateNames += '</table>';
 
-            $('#ComponentEditor_HTMLTabContent').html(Me.UI.Templates.Debug_HTMLEditor.HTML([templateNames]));
+            //JS tab
+            var jsNames = '<table>';
+            $.each(Object.keys(component), function (index, m) {
+                jsNames += '<tr>'
+                jsNames += '<td>';
+                jsNames += '<div class="btn-group">';
+                jsNames += '<div class="btn btn-sm btn-primary">View</div>';
+                jsNames += '<div class="btn btn-sm btn-success">Run</div>';
+                jsNames += '</div>';
+                jsNames += '</td>';
+                jsNames += '<td>' + m + '</td>';
+                jsNames += '</tr>'
+            });
+            jsNames += '</table>';
+
+            //DATA tab
+            var dataNames = '<table>';
+            if (component.Data && Me.Data.Gets) {
+                $.each(Object.keys(component.Data.Gets), function (index, d) {
+                    let dataObj = eval('component.Data.Gets.' + d);
+                    dataNames += '<tr>'
+                    dataNames += '<td><div class="btn btn-sm btn-primary">Run</div></td>';
+                    dataNames += '<td>' + d + '</td>';
+                    dataNames += '</tr>'
+                });
+            }
+            dataNames += '</table>';
+
+
+            $('#ComponentEditor_HTMLTabContent').html(templateNames); //Me.UI.Templates.Debug_HTMLEditor.HTML([templateNames]));
+            $('#ComponentEditor_DataTabContent').css('margin-left', '-144px').css('width', '100%').css('border', '3px solif cornflowerblue');
+            $('#ComponentEditor_DataTabContent').html(dataNames);
+            $('#ComponentEditor_JSTabContent').html(jsNames);
+
             event.stopPropagation();
+        },
+        ViewTemplate: function (templateName, componentNamespace) {
+
+            let templateViewDiv = $('#divTemplateView' + templateName);
+            let component = eval('Apps.Components.' + componentNamespace);
+            let template = eval('component.UI.Templates.' + templateName);
+
+            //Get component functions
+            let methodString = '<select style="height:31px;">';
+            methodString += '<option selected>Function</option>'
+            let methods = Object.keys(component);
+            $.each(methods, function (index, m) {
+                methodString += '<option>' + m + '</option>';
+            });
+            methodString += '</select>';
+
+
+            let viewHtml = Me.UI.Templates.ViewTemplate.HTML([methodString, templateName]); // 'hiya<div onclick="Apps.Components.Debug.HideTemplate(\'' + templateName + '\')">X</div>';
+            templateViewDiv.html(viewHtml);
+            templateViewDiv.show();
+
+        },
+        HideTemplate: function (templateName) {
+            let templateViewDiv = $('#divTemplateView' + templateName);
+            templateViewDiv.hide();
+        },
+        RunTemplate: function (templateName, componentNamespace) {
+
+            let templateViewDiv = $('#divTemplateView' + templateName);
+            let component = eval('Apps.Components.' + componentNamespace);
+            let template = eval('component.UI.Templates.' + templateName);
+
+            let arg1 = $('#' + templateName + '_Arg1').val();
+            let arg2 = $('#' + templateName + '_Arg2').val();
+            let arg3 = $('#' + templateName + '_Arg3').val();
+
+            //$('#divTemplatePreview').html(template.HTML());
+            Me.PreviewWindow = window.open('http://localhost:44350/Scripts/Apps/Components/Debug/Preview.html', '_new', 'left=100,top=100,width=800,height=800', true);
+            Me.PreviewHTML = template.HTML([arg1, arg2, arg3]);
+            //previewWindow.onload = function () {
+            //    let mydiv = previewWindow.document.getElementById('mydiv');
+            //    mydiv.innerHTML = template.HTML([arg1, arg2, arg3]);
+
+            //}
+            var id = setTimeout(Me.ShowPreview, 500);
+            //let newdiv = document.createElement('div');
+            //newdiv.innerHTML = 
+            //previewWindow.document.body.appendChild(newdiv);
+        },
+        ShowPreview: function () {
+            let mydiv = Me.PreviewWindow.document.getElementById('mydiv');
+            mydiv.innerHTML = Me.PreviewHTML;
         },
         ShowTopology: function () {
 

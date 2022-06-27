@@ -7,15 +7,15 @@
       "Description": "AppsJS dev utilities.",
       "ComponentFolder": "",
       "TemplateFolder": "",
-          "Load": true,
-      "UI":true,
+      "Load": true,
+      "UI": true,
       "Initialize": true,
       "Color": "blue",
       "ModuleType": "require",
       "Framework": "default",
       "Components": [],
-          "IsOnDisk": false,
-      "Priority":1
+      "IsOnDisk": false,
+      "Priority": 1
     },
     {
       "Name": "ReactTest",
@@ -164,19 +164,14 @@
       "Load": true,
       "Initialize": true,
       "UI": true,
-        "Components": [{
-            "Name": "Docs",
-            "Load": true,
-            "Initialize": true,
-            "UI": true
-        }]
-    },
-    {
-      "Name": "Dialogs",
-      "Load": false,
-      "Initialize": true,
-      "ModuleType": "require",
-      "Components": []
+      "Components": [
+        {
+          "Name": "Docs",
+          "Load": true,
+          "Initialize": true,
+          "UI": true
+        }
+      ]
     }
   ]
 }

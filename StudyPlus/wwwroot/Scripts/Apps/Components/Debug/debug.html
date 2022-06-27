@@ -3,9 +3,6 @@
     <div id="divDebug" class="debugContainerStyle">
         <div class="btn-group debugbuttongroup">
             <div class="btn btn-primary" onclick="Apps.Components.Debug.ShowComponents();">Components</div>
-            <div class="btn btn-success" onclick="Apps.Components.Debug.ShowHTML();">HTML</div>
-            <div class="btn btn-warning" onclick="Apps.Components.Debug.ShowData();">Data</div>
-            <div class="btn btn-primary" onclick="Apps.Components.Debug.ShowTopology();">Topology</div>
         </div>
     </div>
 </script>
@@ -23,7 +20,6 @@
         <tr>
             <td>{0}</td>
             <td valign="top" style="padding-left:10px;">{1}</td>
-            <td valign="top" style="padding-left:10px;"><div id="debug_PreviewContainer">{2}</div></td>
         </tr>
     </table>
 
@@ -34,7 +30,7 @@
         0 = iFrame source
     -->
     <div id="debug_PreviewIframe">
-        <iframe src="{0}" style="width: 850px; height: 600px;"></iframe>
+        <iframe id="iframePreview" frameborder="0" src="{0}"></iframe>
     </div>
 </script>
 
@@ -64,31 +60,23 @@
 
 </script>
 
-<script id="Settings" type="text/template">
-
-    <h3>Apps Settings</h3>
-    <h4>Web Root</h4>
-    <input id="txtWebRoot" value="{0}" class="form-control" />
-    <h4>Port</h4>
-    <input id="txtPort" value="{1}" class="form-control" />
-    <h4>Virtual Folder</h4>
-    <input id="txtVirtualFolder" value="{2}" class="form-control" />
-    <h4>Apps Root</h4>
-    <input id="txtAppsRoot" value="{3}" class="form-control" />
-    <h4>Required Components</h4>
-    <input id="txtRequired" value="{4}" class="form-control" />
-
-</script>
-
-<script id="Debug_HTMLEditor" type="text/template">
+<script id="ViewTemplate" data-description="" type="text/template">
 
     <!--
-        0= templates
+        0 = component functions select html
+        1 = template name
     -->
-    <div style="display:flex; flex-flow:row">
-        <div>left {0}</div>
-        <div>right</div>
-
-    </div>
+    <table>
+        <tr>
+            <td>Arg 1: <input id="{1}_Arg1" type="text" style="width:50px;" value="1" /> {0}</td>
+        </tr>
+        <tr>
+            <td>Arg 2: <input id="{1}_Arg2" type="text" style="width:50px;" value="2"/> {0}</td>
+        </tr>
+        <tr>
+            <td>Arg 3: <input id="{1}_Arg3" type="text" style="width:50px;" value="3"/> {0}</td>
+        </tr>
+    </table>
 
 </script>
+

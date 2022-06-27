@@ -71,26 +71,26 @@
       "ModuleType": "style",
       "FileName": "vanilla-notify.css",
       "Description": "Enabled app to show popup notifications."
-      },
-      {
-          "Name": "Froala",
-          "Enabled": true,
-          "LoadFirst": false,
-          "Order": 1,
-          "ModuleType": "require",
-          "ModuleName": "Froala",
-          "FileName": "froala.js",
-          "Description": "Editor."
-      },
-      {
-          "Name": "Froala CSS",
-          "Enabled": true,
-          "LoadFirst": false,
-          "Order": 1,
-          "ModuleType": "style",
-          "FileName": "froala.css",
-          "Description": "Editor."
-      },
+    },
+    {
+      "Name": "Froala",
+      "Enabled": true,
+      "LoadFirst": false,
+      "Order": 1,
+      "ModuleType": "require",
+      "ModuleName": "Froala",
+      "FileName": "froala.js",
+      "Description": "Editor."
+    },
+    {
+      "Name": "Froala CSS",
+      "Enabled": true,
+      "LoadFirst": false,
+      "Order": 1,
+      "ModuleType": "style",
+      "FileName": "froala.css",
+      "Description": "Editor."
+    },
 
     {
       "Name": "Util",
@@ -121,25 +121,45 @@
       "ModuleName": "Bind",
       "FileName": "bind.js",
       "Description": ""
-      },
-      {
-          "Name": "Apps Tabstrip Helper",
-          "Enabled": true,
-          "LoadFirst": false,
-          "Order": 2,
-          "ModuleType": "require",
-          "ModuleName": "Tabstrips",
-          "FileName": "tabstrip.js",
-          "Description": "Quick tabs. This version requires util.js in references."
-      },
-      {
-          "Name": "Apps Tabstrip CSS",
-          "Enabled": true,
-          "LoadFirst": false,
-          "Order": 1,
-          "ModuleType": "style",
-          "FileName": "tabstrip.css",
-          "Description": "Decorates Apps Tabstrip."
-      }
+    },
+    {
+      "Name": "Apps Tabstrip Helper",
+      "Enabled": true,
+      "LoadFirst": false,
+      "Order": 2,
+      "ModuleType": "require",
+      "ModuleName": "Tabstrips",
+      "FileName": "tabstrip.js",
+      "Description": "Quick tabs. This version requires util.js in references."
+    },
+    {
+      "Name": "Apps Tabstrip CSS",
+      "Enabled": true,
+      "LoadFirst": false,
+      "Order": 1,
+      "ModuleType": "style",
+      "FileName": "tabstrip.css",
+      "Description": "Decorates Apps Tabstrip."
+    },
+    {
+      "Name": "Apps Dialog Helper",
+      "Enabled": true,
+      "LoadFirst": false,
+      "Order": 2,
+      "ModuleType": "require",
+      "ModuleName": "Dialogs",
+      "FileName": "dialog.js",
+      "Description": "Quick dialogs with drag/drop."
+    },
+    {
+      "Name": "Dialogs CSS",
+      "Enabled": true,
+      "LoadFirst": false,
+      "Order": 1,
+      "ModuleType": "style",
+      "FileName": "dialog.css",
+      "Description": "Common css for built-in base dialog"
+    }
+
   ]
 }

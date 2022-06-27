@@ -170,7 +170,7 @@
     },
     LoadResources: function (callback) {
 
-        Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Resources/resources.js?version=' + Apps.Settings.Version, function (response) {
+        Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Resources/resources.json?version=' + Apps.Settings.Version, function (response) {
 
             Apps.Resources = JSON.parse(response);
 
@@ -406,7 +406,7 @@
             if (Apps.Settings.Debug)
                 console.log('loading components: auto mode');
 
-            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.js?version=' + new Date().getTime(), function (response) {
+            Apps.Download(Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components/components.json?version=' + new Date().getTime(), function (response) {
 
                 let componentsFolder = Apps.Settings.WebRoot + '/' + Apps.Settings.AppsRoot + '/Components';
 
@@ -1289,6 +1289,7 @@ Apps.Data = {
             Data: null,
             Sync: sync,
             Selected: null,
+            Args: args,
             Refresh: function (args, callback) {
 
                 var refreshGetName = getName;

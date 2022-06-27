@@ -53,7 +53,7 @@ define(['./util.js'], function (Util) {
                             newTabstripTabsHTML += '<li class="tabstrip-li">';
                             newTabstripTabsHTML += '<input type="radio" typex="radio" class="tabstrip-radio" name="' + tabTemplateId + '-css3-tabstrip-0" checked="checked" id="' + tabTemplateId + '-css3-tabstrip-0-' + tabIndex + '" />';
                             newTabstripTabsHTML += '<label class="tabstrip-label" onclick="Tabstrips.Select(\'' + tabstripId.trim() + '\', ' + tabIndex + ');" for="css3-tabstrip-0-' + tabIndex + '">' + tabTitle;
-                            newTabstripTabsHTML += '<div id="tabborderhack" style="position: absolute; width: 3px; height: 20px; background: cornflowerblue;  left: -3px;   top: 18px;"></div>';
+                            //newTabstripTabsHTML += '<div id="tabborderhack" style="position: absolute; width: 3px; height: 20px; background: cornflowerblue;  left: -3px;   top: 18px;"></div>';
                             newTabstripTabsHTML += '<span class="validationflagstyle">*</span>';
                             newTabstripTabsHTML += '</label>';
                             newTabstripTabsHTML += '<div id="' + tabTemplateId + 'Content">' + tabHTML + '</div>';

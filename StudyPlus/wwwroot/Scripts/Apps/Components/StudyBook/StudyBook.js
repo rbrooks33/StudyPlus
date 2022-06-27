@@ -5,6 +5,9 @@
 
             Me.UI.Show();
 
+            Apps.Data.RegisterMyGET(Me, 'NewBook', '/api/StudyBook/New', null, true);
+            Apps.Data.RegisterMyGET(Me, 'BookList', '/api/StudyBook/List', null, true);
+
             if (callback)
                 callback();
         },

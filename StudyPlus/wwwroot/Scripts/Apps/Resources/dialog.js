@@ -43,7 +43,8 @@ define([], function () {
         Dialogs: [],
         OpenCallback: null,
         CloseCallback: null,
-        SaveCallback: function (obj, id) {
+        SaveCallback: function (obj, id)
+        {
             if (obj)
                 obj(id);
         },
@@ -72,7 +73,7 @@ define([], function () {
                 attributes += " ondragstart = 'dialog_dragstart_handler(event);'";
                 attributes += " style='display:none;'";
 
-                $(document.forms[0]).append("<div" + attributes + "></div>");
+                $(document.forms[0]).append("<div" + attributes +"></div>");
                 newDialog.Selector = $("#" + elementId);
 
                 //Me.Close(elementId); //default
@@ -81,10 +82,12 @@ define([], function () {
                 Me.Dialogs.push(newDialog);
 
                 //Apply template if included
-                if (templateId) {
+                if(templateId)
+                {
                     //Look for in memory list of templates
                     var template = Enumerable.From(Apps.Util.Templates).Where(function (t) { return t.ID === templateId; }).ToArray();
-                    if (template.length === 1) {
+                    if (template.length === 1)
+                    {
                         //Note that the placeholder is the element we just created
                         Apps.Util.LoadTemplate(template[0].Path, template[0].ID, elementId, Apps.Util.ApplyTemplate);
                     }
@@ -100,7 +103,8 @@ define([], function () {
         //        CommandBuilder.Save(id); //Requires global
         //    }
         //});
-        Register2: function (id, settings) {
+        Register2: function(id, settings)
+        {
             var exists = Me.Exists(id);
             if (!exists.Success) {
 
@@ -109,11 +113,12 @@ define([], function () {
                 var titlecolor = "blue";
                 var titletext = "My Dialog Box";
                 var saveclick = function (id) { };
-                var cancelclick = function (id) { };
+                var cancelclick = function (id) {  };
                 var customcontent = "my content";
                 var style = "";
 
-                if (settings) {
+                if (settings)
+                {
                     if (settings.height)
                         height = settings.height + "px";
                     width = settings.width;
@@ -136,9 +141,9 @@ define([], function () {
                 //Me.Opened = false;
 
                 var attributes = " id='" + id + "'";
-                attributes += " style='display:none;" + style + "'";
+                attributes += " style='display:none;"  + style + "'";
 
-                if (settings.container)
+                if(settings.container)
                     settings.container.append("<div" + attributes + "></div>");
                 else
                     $(document.body).append("<div" + attributes + "></div>");
@@ -162,7 +167,7 @@ define([], function () {
                 content += '';
                 content += '</div>';
                 content += '<div style="display: inline; position: relative; top: -8px; left: 21px; z-index: 200;">';
-                content += '<input type="button" id="' + id + '_DialogsButton" value="OK" class="btn btn-default btn-sm" onclick="Apps.Dialogs.SaveCallback(' + saveclick.toString() + ',\'' + id + '\');" />';
+                content += '<input type="button" id="' + id + '_DialogsButton" value="OK" class="btn btn-default btn-sm" onclick="Apps.Dialogs.SaveCallback(' + saveclick.toString() + ',\'' + id +'\');" />';
                 content += '</div>';
                 content += '';
                 content += '</div>';
@@ -171,7 +176,8 @@ define([], function () {
             }
 
         },
-        DragStart: function (event) {
+        DragStart: function (event)
+        {
             //event.preventDefault();
         },
         DragDrop: function (dialogId, event) {
@@ -183,7 +189,8 @@ define([], function () {
         DragOver: function (event) {
             event.preventDefault();
         },
-        DragEnd: function (event) {
+        DragEnd: function (event)
+        {
 
         },
         Content: function (id, content) {
@@ -229,7 +236,8 @@ define([], function () {
             if (Me.CloseCallback)
                 Me.CloseCallback();
         },
-        CloseAll: function () {
+        CloseAll: function()
+        {
             $.each(Me.Dialogs, function (index, dialog) {
                 Me.Close(dialog.ElementID);
             });
@@ -247,29 +255,34 @@ define([], function () {
             dialog.X = newLeft;
             dialog.Y = newTop;
 
-            dialog.Selector.css("position", "absolute").css("left", newLeft + "px").css("top", newTop + "px");
+            dialog.Selector.css("position","absolute").css("left", newLeft + "px").css("top", newTop + "px");
         },
         Save: function (elementId) {
             if (Me.SaveCallback)
                 Me.SaveCallback(elementId);
         },
         Opened: false,
-        MouseOver: function (elementId) {
+        MouseOver: function(elementId)
+        {
             if (Me.MouseOverCallback)
                 Me.MouseOverCallback(elementId);
         },
-        MouseOut: function (elementId) {
+        MouseOut: function(elementId)
+        {
             if (Me.MouseOutCallback)
                 Me.MouseOutCallback(elementId);
         },
-        Click: function (dialogName, command, index) {
+        Click: function(dialogName, command, index)
+        {
             if (Me.ClickCallback)
                 Me.ClickCallback(dialogName, command, index);
         },
-        Select: function (dialogName) {
+        Select: function(dialogName)
+        {
             var result = new Me.Result();
             var dialogs = Enumerable.From(Me.Dialogs).Where(function (d) { return d.ElementID === dialogName; }).ToArray();
-            if (dialogs.length === 1) {
+            if(dialogs.length === 1)
+            {
                 result.Dialog = dialogs[0];
                 result.Success = true;
             }
@@ -293,7 +306,7 @@ define([], function () {
 
             var result = new Me.Result();
 
-            var existingDialog = Enumerable.From(Me.Dialogs).Where(function (d) { return d.ElementID === elementId; }).ToArray();
+            var existingDialog = Enumerable.From(Me.Dialogs).Where(function (d) { return d.ElementID === elementId }).ToArray();
             if (existingDialog.length === 1) {
                 result.Success = true;
             }
@@ -325,7 +338,8 @@ define([], function () {
             return result;
         }
 
-    };
-    // Me.Initialize(); //Force host to call if needed since calls mostly depend on basefolder anyway
+    }
+   // Me.Initialize(); //Force host to call if needed since calls mostly depend on basefolder anyway
     return Me;
+
 });
